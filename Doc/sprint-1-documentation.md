@@ -1,16 +1,33 @@
 # Sprint 1 Documentation
 ## Secure Distributed Messenger
 
-**Team Name:** [Your Team Name]
+**Team Name:** qukg (Group 26)
 
 **Team Members:**
-- [Name 1] - [Role/Responsibilities]
-- [Name 2] - [Role/Responsibilities]
-- [Name 3] - [Role/Responsibilities]
-- [Name 4] - [Role/Responsibilities]
-- [Name 5] - [Role/Responsibilities]
+- ### Kai Fan | Team Lead / Integration & Architecture
+    - Oversees overall project direction and sprint planning
+    - Designs high-level architecture and component interactions
+    - Handles integration between modules (UI, networking, security)
+    - Manages GitHub workflow, code reviews, and merge approvals
+    - Ensures sprint requirements and deadlines are met
+ - ### Quang Huynh | Networking & Concurrency Engineer / Documentation
+    - Implements TCP client/server communication
+    - Handles multi-threaded send/receive logic
+    - Builds and maintains the thread-safe message queue
+    - Manages connection lifecycle (connect, disconnect, error handling)
+    - Assists with performance and race-condition debugging
+- ### Uday Bista | Security & Encryption Engineer
+    - Implements AES encryption/decryption for messages
+    - Handles RSA key generation and secure key exchange
+    - Implements message signing and signature verification
+    - Ensures secure handling of keys and encrypted data
+    - Documents security design and threat considerations
+- ### Grant Keegan | UI & Testing 
+    - Implements console UI and command handling
+    - Ensures clean separation between UI and backend logic
+    - Leads testing, edge-case validation, and demo preparation
 
-**Date:** [Submission Date]
+**Date:** 02/13/2026
 
 ---
 

@@ -1,7 +1,7 @@
 # Sprint 2 Documentation
 ## Secure Distributed Messenger
 
-**Team Name:** [Your Team Name]
+**Team Name:** qukg (Group 26)
 
 **Team Members:**
 - [Name 1] - [Role/Responsibilities]
@@ -10,7 +10,7 @@
 - [Name 4] - [Role/Responsibilities]
 - [Name 5] - [Role/Responsibilities]
 
-**Date:** [Submission Date]
+**Date:** 03/27/2026
 
 ---
 
