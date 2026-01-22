@@ -4,29 +4,31 @@
 **Team Name:** qukg (Group 26)
 
 **Team Members:**
-- ### Kai Fan | Team Lead / Integration & Architecture
-    - Oversees overall project direction and sprint planning
-    - Designs high-level architecture and component interactions
-    - Handles integration between modules (UI, networking, security)
-    - Manages GitHub workflow, code reviews, and merge approvals
-    - Ensures sprint requirements and deadlines are met
- - ### Quang Huynh | Networking & Concurrency Engineer / Documentation
-    - Implements TCP client/server communication
-    - Handles multi-threaded send/receive logic
-    - Builds and maintains the thread-safe message queue
-    - Manages connection lifecycle (connect, disconnect, error handling)
-    - Assists with performance and race-condition debugging
-    - Writes and maintains sprint documentation (sprint-X-documentation.md)
 - ### Uday Bista | Security & Encryption Engineer
-    - Implements AES encryption/decryption for messages
-    - Handles RSA key generation and secure key exchange
-    - Implements message signing and signature verification
-    - Ensures secure handling of keys and encrypted data
-    - Documents security design and threat considerations
-- ### Grant Keegan | UI & Testing 
-    - Implements console UI and command handling
-    - Ensures clean separation between UI and backend logic
-    - Leads testing, edge-case validation, and demo preparation
+    - Defines the security boundaries and assumptions for the initial networking layer
+    - Designs message formats with future encryption hooks (plaintext for Sprint 1)
+    - Advises on safe handling of sensitive data in memory (no hardcoded secrets, clean buffers)
+    - Documents security considerations and threat model relevant to TCP communication
+    - Prepares interface contracts for encryption to be integrated in later sprints
+- ### Kai Fan | Team Lead / Integration & Architecture
+    - Defines overall Sprint 1 architecture (UI ↔ Message Queue ↔ Networking)
+    - Coordinates responsibilities across threading, networking, and UI modules
+    - Oversees Program.cs main loop, lifecycle flow, and event wiring
+    - Ensures modules interact only through clean interfaces and events
+    - Manages GitHub workflow, reviews PRs, and ensures Sprint 1 deliverables are met
+ - ### Quang Huynh | Networking & Concurrency Engineer / Documentation
+    - Implements TCP server and client logic using TcpListener and TcpClient
+    - Builds multi-threaded send/receive loops for active connections
+    - Implements the thread-safe MessageQueue (producer/consumer pattern)
+    - Handles connection lifecycle management (connect, disconnect, errors)
+    - Debugs race conditions, deadlocks, and blocking issues
+    - Writes Sprint 1 technical documentation (sprint-1-documentation.md)
+- ### Grant Keegan | UI & Testing Engineer
+    - Implements console-based UI and command parsing logic
+    - Ensures UI runs independently of networking threads
+    - Displays inbound/outbound messages via events
+    - Tests thread safety, invalid commands, disconnect scenarios
+    - Prepares Sprint 1 demo and validates end-to-end message flow
 
 **Date:** 02/13/2026
 
