@@ -16,6 +16,7 @@
     - Builds and maintains the thread-safe message queue
     - Manages connection lifecycle (connect, disconnect, error handling)
     - Assists with performance and race-condition debugging
+    - Writes and maintains sprint documentation (sprint-X-documentation.md)
 - ### Uday Bista | Security & Encryption Engineer
     - Implements AES encryption/decryption for messages
     - Handles RSA key generation and secure key exchange
