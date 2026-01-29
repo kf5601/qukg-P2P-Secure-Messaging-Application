@@ -4,6 +4,14 @@
 // SPRINT 3: P2P & Advanced Features
 // Due: Week 14 | Work on: Weeks 11-13
 //
+// NOTE: This file is NOT used in Sprint 1 or Sprint 2!
+//
+// In Sprint 1-2, users manually connect using /connect and /listen.
+// In Sprint 3, this class enables automatic peer discovery:
+// - Broadcasts presence on the local network via UDP
+// - Discovers other messengers automatically
+// - Triggers automatic connection attempts
+//
 
 using System.Net;
 using System.Net.Sockets;

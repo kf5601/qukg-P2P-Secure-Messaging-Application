@@ -25,43 +25,43 @@ namespace SecureMessenger;
 ///    - Parses commands using ConsoleUI
 ///    - Dispatches commands to appropriate handlers
 ///
-/// 2. Listen Thread (Server)
-///    - Runs TcpServer to accept incoming connections
-///    - Each accepted connection spawns a receive thread
+/// 2. Accept Thread (Server)
+///    - Runs Server to accept incoming connections
+///    - Each accepted connection spawns a receive task
 ///
-/// 3. Receive Thread(s)
-///    - One per connected peer
+/// 3. Receive Task(s)
+///    - One per connected client
 ///    - Reads messages from network
-///    - Enqueues to incoming message queue
+///    - Invokes OnMessageReceived event
 ///
-/// 4. Send Thread
-///    - Dequeues from outgoing message queue
-///    - Sends messages to connected peers
-///
-/// 5. Process Thread (Optional)
-///    - Dequeues from incoming message queue
-///    - Displays messages to user
-///    - Handles decryption and verification
+/// 4. Client Receive Task
+///    - Reads messages from server we connected to
+///    - Invokes OnMessageReceived event
 ///
 /// Thread Communication:
-/// - Use MessageQueue for thread-safe message passing
+/// - Use events for connection/disconnection/message notifications
 /// - Use CancellationToken for graceful shutdown
-/// - Use events for peer connection/disconnection notifications
+/// - (Optional) Use MessageQueue for more complex processing pipelines
 ///
 /// Sprint Progression:
 /// - Sprint 1: Basic threading and networking (connect, send, receive)
+///             Uses simple Client/Server model
 /// - Sprint 2: Add encryption (key exchange, AES encryption, signing)
-/// - Sprint 3: Add resilience (peer discovery, heartbeat, reconnection)
+/// - Sprint 3: Upgrade to peer-to-peer model with Peer class,
+///             add peer discovery, heartbeat, and reconnection
 /// </summary>
 class Program
 {
-    // TODO: Declare your components as fields if needed for access across methods
-    // Examples:
-    // private static MessageQueue? _messageQueue;
-    // private static TcpServer? _tcpServer;
-    // private static TcpClientHandler? _tcpClientHandler;
-    // private static ConsoleUI? _consoleUI;
-    // private static CancellationTokenSource? _cancellationTokenSource;
+    // TODO: Declare your components as fields for access across methods
+    // Sprint 1-2 components:
+    // private static Server? _server;
+    // private static Client? _client;
+    // private static ConsoleUI? _ui;
+    // private static string _username = "User";
+    //
+    // Sprint 3 additions:
+    // private static PeerDiscovery? _peerDiscovery;
+    // private static HeartbeatMonitor? _heartbeatMonitor;
 
     static async Task Main(string[] args)
     {
@@ -69,22 +69,21 @@ class Program
         Console.WriteLine("============================");
 
         // TODO: Initialize components
-        // 1. Create CancellationTokenSource for shutdown signaling
-        // 2. Create MessageQueue for thread communication
+        // 1. Create Server for incoming connections
+        // 2. Create Client for outgoing connection
         // 3. Create ConsoleUI for user interface
-        // 4. Create TcpServer for incoming connections
-        // 5. Create TcpClientHandler for outgoing connections
+        // 4. (Optional) Create MessageQueue if using producer/consumer pattern
 
         // TODO: Subscribe to events
-        // 1. TcpServer.OnPeerConnected - handle new incoming connections
-        // 2. TcpServer.OnMessageReceived - handle received messages
-        // 3. TcpServer.OnPeerDisconnected - handle disconnections
-        // 4. TcpClientHandler events (same pattern)
-
-        // TODO: Start background threads
-        // 1. Start a thread/task for processing incoming messages
-        // 2. Start a thread/task for sending outgoing messages
-        // Note: TcpServer.Start() will create its own listen thread
+        // Server events:
+        // - _server.OnClientConnected += endpoint => { ... };
+        // - _server.OnClientDisconnected += endpoint => { ... };
+        // - _server.OnMessageReceived += message => { ... };
+        //
+        // Client events:
+        // - _client.OnConnected += endpoint => { ... };
+        // - _client.OnDisconnected += endpoint => { ... };
+        // - _client.OnMessageReceived += message => { ... };
 
         Console.WriteLine("Type /help for available commands");
         Console.WriteLine();
@@ -98,12 +97,12 @@ class Program
             // 2. Skip empty input
             // 3. Parse the input using ConsoleUI.ParseCommand()
             // 4. Handle the command based on CommandType:
-            //    - Connect: Call TcpClientHandler.ConnectAsync()
-            //    - Listen: Call TcpServer.Start()
-            //    - ListPeers: Display connected peers
-            //    - History: Show message history
+            //    - Connect: Call await _client.ConnectAsync(host, port)
+            //    - Listen: Call _server.Start(port)
+            //    - ListPeers: Display connection status
+            //    - History: Show message history (Sprint 3)
             //    - Quit: Set running = false
-            //    - Not a command: Send as a message to peers
+            //    - Not a command: Send as a message
 
             var input = Console.ReadLine();
             if (string.IsNullOrEmpty(input)) continue;
@@ -125,34 +124,37 @@ class Program
         }
 
         // TODO: Implement graceful shutdown
-        // 1. Cancel the CancellationTokenSource
-        // 2. Stop the TcpServer
-        // 3. Disconnect all clients
-        // 4. Complete the MessageQueue
-        // 5. Wait for background threads to finish
+        // 1. Stop the server
+        // 2. Disconnect the client
+        // 3. (Sprint 3) Stop peer discovery and heartbeat monitor
 
         Console.WriteLine("Goodbye!");
     }
 
     /// <summary>
     /// Display help information.
-    /// This is a temporary implementation - integrate with ConsoleUI.ShowHelp()
+    /// Replace this with ConsoleUI.ShowHelp() once implemented.
     /// </summary>
     private static void ShowHelp()
     {
         Console.WriteLine("\nAvailable Commands:");
-        Console.WriteLine("  /connect <ip> <port>  - Connect to a peer");
+        Console.WriteLine("  /connect <ip> <port>  - Connect to another messenger");
         Console.WriteLine("  /listen <port>        - Start listening for connections");
-        Console.WriteLine("  /peers                - List connected peers");
-        Console.WriteLine("  /history              - View message history");
+        Console.WriteLine("  /peers                - Show connection status");
+        Console.WriteLine("  /history              - View message history (Sprint 3)");
         Console.WriteLine("  /quit                 - Exit the application");
+        Console.WriteLine();
+        Console.WriteLine("Sprint Progression:");
+        Console.WriteLine("  Sprint 1: Basic /connect and /listen with message sending");
+        Console.WriteLine("  Sprint 2: Messages are encrypted end-to-end");
+        Console.WriteLine("  Sprint 3: Automatic peer discovery and reconnection");
         Console.WriteLine();
     }
 
     // TODO: Add helper methods as needed
     // Examples:
-    // - ProcessIncomingMessages() - background task to process received messages
-    // - SendOutgoingMessages() - background task to send queued messages
-    // - HandlePeerConnected(Peer peer) - event handler for new connections
-    // - HandleMessageReceived(Peer peer, Message message) - event handler for messages
+    // - HandleListen(string[] args) - start the server
+    // - HandleConnect(string[] args) - connect to a server
+    // - HandlePeers() - show connection status
+    // - SendMessage(string content) - send to all connections
 }

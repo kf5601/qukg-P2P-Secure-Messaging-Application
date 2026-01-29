@@ -4,6 +4,16 @@
 // SPRINT 3: P2P & Advanced Features
 // Due: Week 14 | Work on: Weeks 11-13
 //
+// NOTE: This file is NOT used in Sprint 1 or Sprint 2!
+//
+// In Sprint 1-2, if a connection drops, it's gone - the user must
+// manually /connect again.
+//
+// In Sprint 3, this class enables automatic reconnection:
+// - When HeartbeatMonitor detects a failed connection, this kicks in
+// - Uses exponential backoff to avoid overwhelming a recovering server
+// - Gives up after max attempts and notifies the user
+//
 
 using System.Collections.Concurrent;
 using SecureMessenger.Core;
@@ -29,19 +39,19 @@ namespace SecureMessenger.Network;
 public class ReconnectionPolicy
 {
     private readonly ConcurrentDictionary<string, int> _attemptCount = new();
-    private readonly TcpClientHandler _clientHandler;
+    private readonly Client _client;
 
     private const int MaxAttempts = 5;
     private const int InitialDelayMs = 1000;
     private const int MaxDelayMs = 30000;
 
-    public event Action<string, int>? OnReconnectAttempt;
+    public event Action<string, int>? OnReconnectAttempt;   // peerId, attemptNumber
     public event Action<string>? OnReconnectSuccess;
     public event Action<string>? OnReconnectFailed;
 
-    public ReconnectionPolicy(TcpClientHandler clientHandler)
+    public ReconnectionPolicy(Client client)
     {
-        _clientHandler = clientHandler;
+        _client = client;
     }
 
     /// <summary>
@@ -52,17 +62,21 @@ public class ReconnectionPolicy
     /// 2. Loop while attempt < MaxAttempts:
     ///    a. Increment attempt count and store in _attemptCount
     ///    b. Log reconnection attempt
-    ///    c. Invoke OnReconnectAttempt event
+    ///    c. Invoke OnReconnectAttempt event with peerId and attempt number
     ///    d. Calculate delay using exponential backoff:
     ///       delay = min(InitialDelayMs * 2^(attempt-1), MaxDelayMs)
-    ///    e. Try to connect using _clientHandler.ConnectAsync
+    ///       Hint: Use Math.Min and bit shifting (1 << (attempt-1)) or Math.Pow
+    ///    e. Try to connect using _client.ConnectAsync(peer.Address, peer.Port)
     ///    f. If successful:
     ///       - Log success
-    ///       - Call ResetAttempts
+    ///       - Call ResetAttempts(peer.Id)
     ///       - Invoke OnReconnectSuccess
     ///       - Return true
-    ///    g. If failed, log error and wait for calculated delay
-    /// 3. After max attempts, log failure, invoke OnReconnectFailed, return false
+    ///    g. If failed, log error and await Task.Delay for calculated delay
+    /// 3. After max attempts:
+    ///    - Log failure
+    ///    - Invoke OnReconnectFailed
+    ///    - Return false
     /// </summary>
     public async Task<bool> TryReconnect(Peer peer)
     {
@@ -74,7 +88,7 @@ public class ReconnectionPolicy
     /// Call this after a successful connection.
     ///
     /// TODO: Implement the following:
-    /// 1. Remove the peer's entry from _attemptCount
+    /// 1. Remove the peer's entry from _attemptCount using TryRemove
     /// </summary>
     public void ResetAttempts(string peerId)
     {
@@ -85,7 +99,7 @@ public class ReconnectionPolicy
     /// Get current attempt count for a peer.
     ///
     /// TODO: Implement the following:
-    /// 1. Try to get value from _attemptCount
+    /// 1. Try to get value from _attemptCount using TryGetValue
     /// 2. Return the count, or 0 if not found
     /// </summary>
     public int GetAttemptCount(string peerId)

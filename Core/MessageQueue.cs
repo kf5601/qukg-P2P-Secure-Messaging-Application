@@ -4,6 +4,25 @@
 // SPRINT 1: Threading & Basic Networking
 // Due: Week 5 | Work on: Weeks 3-4
 //
+// KEY CONCEPTS USED IN THIS FILE:
+//   - BlockingCollection<T>: thread-safe queue that blocks on Take() (see HINTS.md)
+//   - Producer/Consumer pattern: network threads add, processing threads take
+//   - CancellationToken: allows Take() to be interrupted during shutdown
+//
+// NOTE: This class is OPTIONAL for Sprint 1!
+//
+// The simplest approach (used in the reference solution) is to handle messages
+// directly in event handlers:
+//   - server.OnMessageReceived += message => ui.DisplayMessage(message);
+//
+// MessageQueue is useful if you want a more sophisticated architecture:
+//   - Separate network I/O from message processing
+//   - Buffer messages during high load
+//   - Process messages on a dedicated thread
+//
+// If you're just getting started, skip MessageQueue and use direct events.
+// You can always refactor to use MessageQueue later if needed.
+//
 
 using System.Collections.Concurrent;
 
@@ -17,9 +36,9 @@ namespace SecureMessenger.Core;
 /// - Consumers take messages from the queue (processing threads, send threads)
 ///
 /// Thread Safety Options:
-/// 1. BlockingCollection<T> - recommended, handles blocking and thread safety
-/// 2. ConcurrentQueue<T> with manual synchronization
-/// 3. Queue<T> with explicit locking
+/// 1. BlockingCollection&lt;T&gt; - recommended, handles blocking and thread safety
+/// 2. ConcurrentQueue&lt;T&gt; with manual synchronization
+/// 3. Queue&lt;T&gt; with explicit locking
 ///
 /// The blocking behavior is important:
 /// - Take() should block when the queue is empty
@@ -46,18 +65,18 @@ public class MessageQueue
 
     /// <summary>
     /// Dequeue an incoming message for processing.
-    /// This method should BLOCK if the queue is empty.
+    /// This method BLOCKS if the queue is empty - hence "Blocking" in the name.
     ///
     /// TODO: Implement the following:
     /// 1. Take a message from the incoming queue
     /// 2. Block if the queue is empty (don't busy-wait)
     /// 3. Support cancellation via the CancellationToken
     ///
-    /// Hint: BlockingCollection.Take() does this automatically
+    /// Hint: BlockingCollection.Take(cancellationToken) does this automatically
     /// </summary>
-    public Message DequeueIncoming(CancellationToken cancellationToken = default)
+    public Message DequeueIncomingBlocking(CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException("Implement DequeueIncoming() - see TODO in comments above");
+        throw new NotImplementedException("Implement DequeueIncomingBlocking() - see TODO in comments above");
     }
 
     /// <summary>
@@ -89,16 +108,29 @@ public class MessageQueue
 
     /// <summary>
     /// Dequeue an outgoing message for sending.
-    /// This method should BLOCK if the queue is empty.
+    /// This method BLOCKS if the queue is empty - hence "Blocking" in the name.
     ///
     /// TODO: Implement the following:
     /// 1. Take a message from the outgoing queue
     /// 2. Block if the queue is empty
     /// 3. Support cancellation via the CancellationToken
     /// </summary>
-    public Message DequeueOutgoing(CancellationToken cancellationToken = default)
+    public Message DequeueOutgoingBlocking(CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException("Implement DequeueOutgoing() - see TODO in comments above");
+        throw new NotImplementedException("Implement DequeueOutgoingBlocking() - see TODO in comments above");
+    }
+
+    /// <summary>
+    /// Try to dequeue an outgoing message without blocking.
+    ///
+    /// TODO: Implement the following:
+    /// 1. Attempt to take a message from the outgoing queue
+    /// 2. Return true if successful, false if queue is empty
+    /// 3. Set 'message' to the dequeued message or null
+    /// </summary>
+    public bool TryDequeueOutgoing(out Message? message)
+    {
+        throw new NotImplementedException("Implement TryDequeueOutgoing() - see TODO in comments above");
     }
 
     /// <summary>

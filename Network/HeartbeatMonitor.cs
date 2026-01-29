@@ -4,6 +4,16 @@
 // SPRINT 3: P2P & Advanced Features
 // Due: Week 14 | Work on: Weeks 11-13
 //
+// NOTE: This file is NOT used in Sprint 1 or Sprint 2!
+//
+// In Sprint 1-2, there's no heartbeat monitoring - if a connection drops,
+// you only find out when a send/receive fails.
+//
+// In Sprint 3, this class enables proactive connection health monitoring:
+// - Periodic heartbeat messages detect silent connection failures
+// - Triggers OnConnectionFailed when a peer stops responding
+// - Works with ReconnectionPolicy to attempt automatic reconnection
+//
 
 using System.Collections.Concurrent;
 using System.Diagnostics;

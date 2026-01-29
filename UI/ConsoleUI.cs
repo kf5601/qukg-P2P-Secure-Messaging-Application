@@ -14,28 +14,22 @@ namespace SecureMessenger.UI;
 /// Handles user input parsing and message display.
 ///
 /// Supported Commands:
-/// - /connect <ip> <port>  - Connect to a peer
-/// - /listen <port>        - Start listening for connections
-/// - /peers                - List known peers
-/// - /history              - View message history
-/// - /quit or /exit        - Exit the application
-/// - Any other text        - Send as a message
+/// - /connect host port  - Connect to another messenger
+/// - /listen port        - Start listening for connections
+/// - /peers              - Show connection status
+/// - /history            - View message history (Sprint 3)
+/// - /quit or /exit      - Exit the application
+/// - Any other text      - Send as a message
 /// </summary>
 public class ConsoleUI
 {
-    private readonly MessageQueue _messageQueue;
-
-    public ConsoleUI(MessageQueue messageQueue)
-    {
-        _messageQueue = messageQueue;
-    }
-
     /// <summary>
     /// Display a received message to the console.
     ///
     /// TODO: Implement the following:
-    /// 1. Format the timestamp as "HH:mm:ss"
-    /// 2. Print in format: "[timestamp] sender: content"
+    /// 1. Format the message nicely, e.g.: "[14:30:25] Alice: Hello!"
+    /// 2. Use message.Timestamp.ToString("HH:mm:ss") for time format
+    /// 3. Print to console
     /// </summary>
     public void DisplayMessage(Message message)
     {
@@ -46,7 +40,7 @@ public class ConsoleUI
     /// Display a system message to the console.
     ///
     /// TODO: Implement the following:
-    /// 1. Print in format: "[System] message"
+    /// 1. Print in a distinct format, e.g.: "[System] Server started on port 5000"
     /// </summary>
     public void DisplaySystem(string message)
     {
@@ -73,14 +67,19 @@ public class ConsoleUI
     ///    - Return CommandResult with IsCommand = false, Message = input
     ///
     /// 2. If it's a command, split by spaces and parse:
-    ///    - "/connect <ip> <port>" -> CommandType.Connect with Args = [ip, port]
-    ///    - "/listen <port>" -> CommandType.Listen with Args = [port]
-    ///    - "/peers" -> CommandType.ListPeers
+    ///    - "/connect host port" -> CommandType.Connect with Args = [host, port]
+    ///    - "/listen port" -> CommandType.Listen with Args = [port]
+    ///    - "/peers" -> CommandType.Peers
     ///    - "/history" -> CommandType.History
     ///    - "/quit" or "/exit" -> CommandType.Quit
+    ///    - "/help" -> CommandType.Help
     ///    - Unknown command -> CommandType.Unknown with error message
     ///
-    /// Hint: Use string.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+    /// 3. Validate arguments:
+    ///    - /connect requires 2 args (host and port)
+    ///    - /listen requires 1 arg (port)
+    ///
+    /// Hint: Use input.Split(' ', StringSplitOptions.RemoveEmptyEntries)
     /// Hint: Use a switch expression for clean command matching
     /// </summary>
     public CommandResult ParseCommand(string input)
@@ -97,8 +96,9 @@ public enum CommandType
     Unknown,
     Connect,
     Listen,
-    ListPeers,
+    Peers,
     History,
+    Help,
     Quit
 }
 
@@ -113,7 +113,7 @@ public class CommandResult
     /// <summary>The type of command parsed</summary>
     public CommandType CommandType { get; set; }
 
-    /// <summary>Arguments for the command (e.g., IP and port for /connect)</summary>
+    /// <summary>Arguments for the command (e.g., host and port for /connect)</summary>
     public string[]? Args { get; set; }
 
     /// <summary>The message content (for non-commands or error messages)</summary>
