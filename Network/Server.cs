@@ -195,4 +195,22 @@ public class Server
             }
         }
     }
+
+    /// <summary>
+    /// Reads exactly 'count' bytes unless the stream ends or cancellation is requested.
+    /// Returns false if remote closed (ReadAsync returns 0) before full read.
+    /// </summary>
+    private static async Task<bool> ReadExactAsync(NetworkStream stream, byte[] buffer, int count, CancellationToken ct)
+    {
+        int offset = 0;
+        while (offset < count)
+        {
+            int read = await stream.ReadAsync(buffer, offset, count - offset, ct);
+            if (read == 0)
+                return false;
+
+            offset += read;
+        }
+        return true;
+    }
 }
