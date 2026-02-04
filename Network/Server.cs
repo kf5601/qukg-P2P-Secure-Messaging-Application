@@ -177,7 +177,20 @@ public class Server
     /// </summary>
     private void DisconnectClient(TcpClient client, string endpoint)
     {
-        throw new NotImplementedException("Implement DisconnectClient() - see TODO in comments above");
+       bool removed = false;
+       lock(_clientsLock)
+       {
+            removed = _clients.Remove(client);
+       }
+       try
+        {
+            client.Close();
+            client.Dispose();
+        } catch { }
+        if(removed)
+        {
+            OnClientDisconnected?.Invoke(endpoint);
+        }
     }
 
     /// <summary>
