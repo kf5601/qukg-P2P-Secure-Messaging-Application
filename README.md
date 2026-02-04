@@ -70,8 +70,8 @@ SecureMessenger/
 │   ├── MessageQueue.cs        # Thread-safe queue (implement)
 │   └── Peer.cs                # Peer information (provided)
 ├── Network/
-│   ├── TcpServer.cs           # Listens for connections (implement)
-│   ├── TcpClientHandler.cs    # Handles outgoing connections (implement)
+│   ├── Server.cs              # Listens for connections (implement)
+│   ├── Client.cs              # Handles outgoing connections (implement)
 │   ├── PeerDiscovery.cs       # UDP broadcast discovery (implement)
 │   ├── HeartbeatMonitor.cs    # Connection health monitoring (implement)
 │   └── ReconnectionPolicy.cs  # Automatic reconnection (implement)
@@ -115,8 +115,8 @@ All methods marked with `throw new NotImplementedException()` - look for the det
 **Files to complete:**
 - `Program.cs` - Main loop, thread creation, event handling
 - `Core/MessageQueue.cs` - Thread-safe producer/consumer queue
-- `Network/TcpServer.cs` - TCP listener, accept loop, receive threads
-- `Network/TcpClientHandler.cs` - TCP client, connect, send/receive
+- `Network/Server.cs` - TCP listener, accept loop, receive threads
+- `Network/Client.cs` - TCP client, connect, send/receive
 - `UI/ConsoleUI.cs` - Command parsing and message display
 
 **Key concepts:**
