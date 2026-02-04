@@ -211,7 +211,57 @@ public class Client
     /// </summary>
     public void Send(Message message)
     {
-        throw new NotImplementedException("Implement Send() - see TODO in comments above");
+        _ = SendAsync(message); // fire and forget wrapper so Send stays synchronous
+    }
+
+    /// <summary>
+    /// Asynchronous send implementation.
+    /// </summary>
+    /// <param name="message"></param>
+    /// <returns></returns>
+    private async Task SendAsync(Message message)
+{
+        try
+        {
+            var stream = _stream;
+            var client = _client;
+
+            if (stream == null || client == null || !client.Connected)
+            {
+                Console.WriteLine("[Client] Send failed: not connected");
+                return;
+            }
+
+            string json = JsonSerializer.Serialize(message);
+            byte[] payload = Encoding.UTF8.GetBytes(json);
+
+            byte[] prefix = BitConverter.GetBytes(payload.Length); // length-prefix framing (4-byte little-endian int)
+
+            await _sendLock.WaitAsync();
+            try
+            {
+                await stream.WriteAsync(prefix, 0, prefix.Length);
+                await stream.WriteAsync(payload, 0, payload.Length);
+                await stream.FlushAsync();
+            }
+            finally
+            {
+                _sendLock.Release();
+            }
+        }
+        catch (ObjectDisposedException)
+        {
+            // Disconnect in progress
+        }
+        catch (IOException ex)
+        {
+            Console.WriteLine($"[Client] Send IO error: {ex.Message}");
+            Disconnect(); // likely dead connection
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Client] Send error: {ex.Message}");
+        }
     }
 
     /// <summary>
