@@ -46,6 +46,7 @@ public class Client
     private NetworkStream? _stream;
     private CancellationTokenSource? _cancellationTokenSource;
     private string _serverEndpoint = "";
+    private int _disconnectedFire = 0; // 0 = not fired, 1 = fired
 
     private readonly SemaphoreSlim _sendLock = new SemaphoreSlim(1, 1);
 
@@ -87,6 +88,7 @@ public class Client
 
             _stream = _client.GetStream();
             _serverEndpoint = _client.Client.RemoteEndPoint?.ToString() ?? $"{host}:{port}";
+            Interlocked.Exchange(ref _disconnectedFire, 0); // reset disconnected event flag
             OnConnected?.Invoke(_serverEndpoint);
 
             _ = Task.Run(ReceiveAsync, cancel_token); // start receive loop in background
@@ -187,10 +189,13 @@ public class Client
         }
         finally
         {
-            // Ensure resources are closed and event fires exactly once.
+            // ensure resources are closed and event fires exactly once
             var endpoint = _serverEndpoint;
-            DisconnectInternal(fireEvent: false); // we'll fire event ourselves here
-            OnDisconnected?.Invoke(endpoint);
+            DisconnectInternal();
+            if(!string.IsNullOrWhiteSpace(endpoint) && Interlocked.Exchange(ref _disconnectedFire, 1) == 0)
+            {
+                OnDisconnected?.Invoke(endpoint);
+            }
         }
     }
 
@@ -274,14 +279,18 @@ public class Client
     /// </summary>
     public void Disconnect()
     {
-        DisconnectInternal(fireEvent: true);
+        var endpoint = _serverEndpoint;
+        DisconnectInternal();
+        if(!string.IsNullOrWhiteSpace(endpoint) && Interlocked.Exchange(ref _disconnectedFire, 1) == 0)
+        {
+            OnDisconnected?.Invoke(endpoint);
+        }
     }
     
     /// <summary>
     /// Internal disconnect logic.
     /// </summary>
-    /// <param name="fireEvent"></param>
-    private void DisconnectInternal(bool fireEvent)
+    private void DisconnectInternal()
     {
         try
         {
@@ -299,23 +308,14 @@ public class Client
         try
         {
             _client?.Close();
+            _client?.Dispose();
         }
         catch { }
-
-        if (fireEvent)
-        {
-            var endpoint = _serverEndpoint;
-            OnDisconnected?.Invoke(endpoint);
-        }
 
         _client = null;
         _stream = null;
         _cancellationTokenSource = null;
         _serverEndpoint = "";
-        if(fireEvent && !string.IsNullOrWhiteSpace(_serverEndpoint))
-        {
-            OnDisconnected?.Invoke(_serverEndpoint);
-        }
     }
 
 
