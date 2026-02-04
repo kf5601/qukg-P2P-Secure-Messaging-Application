@@ -101,7 +101,39 @@ public class Server
     /// </summary>
     private async Task AcceptClientsAsync()
     {
-        throw new NotImplementedException("Implement AcceptClientsAsync() - see TODO in comments above");
+        var cancel_token = _cancellationTokenSource?.Token ?? CancellationToken.None;
+        try
+        {
+            if(_listener == null)
+            {
+                return;
+            }
+            while(!cancel_token.IsCancellationRequested)
+            {
+                TcpClient client;
+                try
+                {
+                    client = await _listener.AcceptTcpClientAsync(cancel_token);
+                }
+                catch(OperationCanceledException)
+                {
+                    break; // normal shutdown
+                }
+                var endpoint = client.Client.RemoteEndPoint?.ToString() ?? "unknown";
+                lock(_clientsLock)
+                {
+                    _clients.Add(client);
+                }
+                OnClientConnected?.Invoke(endpoint);
+                _ = Task.Run(() => ReceiveFromClientAsync(client, endpoint), cancel_token); // start pr-client receive loop
+            }
+        } catch(OperationCanceledException)
+        {
+            // normal shutdown
+        } catch(Exception ex)
+        {
+            Console.WriteLine($"Error in AcceptClientsAsync: {ex.Message}");
+        }
     }
 
     /// <summary>
@@ -197,8 +229,8 @@ public class Server
     }
 
     /// <summary>
-    /// Reads exactly 'count' bytes unless the stream ends or cancellation is requested.
-    /// Returns false if remote closed (ReadAsync returns 0) before full read.
+    /// Reads exactly 'count' bytes unless the stream ends or cancellation is requested
+    /// Returns false if remote closed (ReadAsync returns 0) before full read
     /// </summary>
     private static async Task<bool> ReadExactAsync(NetworkStream stream, byte[] buffer, int count, CancellationToken ct)
     {
