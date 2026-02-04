@@ -22,6 +22,7 @@
 //               integrate with PeerDiscovery for automatic connections
 //
 
+using System.Linq.Expressions;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
@@ -123,7 +124,74 @@ public class Client
     /// </summary>
     private async Task ReceiveAsync()
     {
-        throw new NotImplementedException("Implement ReceiveAsync() - see TODO in comments above");
+        // snapshot references so they dont change mid-loop
+       var cancel_token = _cancellationTokenSource?.Token ?? CancellationToken.None;
+       var stream = _stream;
+       var client = _client;
+       try
+        {
+            if(stream == null || client == null)
+                return;
+
+            var lengthBuffer = new byte[4];
+            while (!cancel_token.IsCancellationRequested && client.Connected)
+            {
+                bool gotLen = await ReadExactAsync(stream, lengthBuffer, 4, cancel_token);
+                if(!gotLen)
+                {
+                    break; // disconnected
+                }
+                int length = BitConverter.ToInt32(lengthBuffer, 0);
+                if(length <= 0 || length > 1_000_000) // validate length
+                {
+                    Console.WriteLine($"[Client] Invalid message length: {length}");
+                    break;
+                }
+                var payloadBuffer = new byte[length]; // read payload
+                bool gotPayload = await ReadExactAsync(stream, payloadBuffer, length, cancel_token);
+                if(!gotPayload) 
+                {
+                    break; // disconnected
+                }
+                string json = Encoding.UTF8.GetString(payloadBuffer);
+                Message ? msg = null;
+                try
+                {
+                    msg = JsonSerializer.Deserialize<Message>(json);
+                } catch(Exception ex)
+                {
+                    Console.WriteLine($"[Client] Error deserializing message: {ex.Message}");
+                    continue; // skip this message
+                }
+                if(msg != null)
+                {
+                    OnMessageReceived?.Invoke(msg);
+                }
+            }
+        } 
+        catch (OperationCanceledException)
+        {
+            // Normal shutdown path
+        }
+        catch (ObjectDisposedException)
+        {
+            // Stream/client disposed during shutdown
+        }
+        catch (IOException)
+        {
+            // Network stream closed/reset
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Client] Receive loop error: {ex.Message}");
+        }
+        finally
+        {
+            // Ensure resources are closed and event fires exactly once.
+            var endpoint = _serverEndpoint;
+            DisconnectInternal(fireEvent: false); // we'll fire event ourselves here
+            OnDisconnected?.Invoke(endpoint);
+        }
     }
 
     /// <summary>
@@ -156,6 +224,67 @@ public class Client
     /// </summary>
     public void Disconnect()
     {
-        throw new NotImplementedException("Implement Disconnect() - see TODO in comments above");
+        DisconnectInternal(fireEvent: true);
+    }
+    
+    /// <summary>
+    /// Internal disconnect logic.
+    /// </summary>
+    /// <param name="fireEvent"></param>
+    private void DisconnectInternal(bool fireEvent)
+    {
+        try
+        {
+            _cancellationTokenSource?.Cancel();
+        }
+        catch { }
+
+        try
+        {
+            _stream?.Close();
+            _stream?.Dispose();
+        }
+        catch { }
+
+        try
+        {
+            _client?.Close();
+        }
+        catch { }
+
+        if (fireEvent)
+        {
+            var endpoint = _serverEndpoint;
+            OnDisconnected?.Invoke(endpoint);
+        }
+
+        _client = null;
+        _stream = null;
+        _cancellationTokenSource = null;
+        _serverEndpoint = "";
+        if(fireEvent && !string.IsNullOrWhiteSpace(_serverEndpoint))
+        {
+            OnDisconnected?.Invoke(_serverEndpoint);
+        }
+    }
+
+
+    /// <summary>
+    /// Reads exactly 'count' bytes unless the stream ends or cancellation is requested.
+    /// Returns false if remote closed (ReadAsync returns 0) before full read.
+    /// </summary>
+    private static async Task<bool> ReadExactAsync(NetworkStream stream, byte[] buffer, int count, CancellationToken ct)
+    {
+        int offset = 0;
+        while (offset < count)
+        {
+            int read = await stream.ReadAsync(buffer, offset, count - offset, ct);
+            if (read == 0)
+            {
+                return false; // remote closed
+            }
+            offset += read;
+        }
+        return true;
     }
 }
