@@ -46,6 +46,8 @@ public class Client
     private CancellationTokenSource? _cancellationTokenSource;
     private string _serverEndpoint = "";
 
+    private readonly SemaphoreSlim _sendLock = new SemaphoreSlim(1, 1);
+
     public event Action<string>? OnConnected;
     public event Action<string>? OnDisconnected;
     public event Action<Message>? OnMessageReceived;
@@ -71,9 +73,31 @@ public class Client
     /// </summary>
     public async Task<bool> ConnectAsync(string host, int port)
     {
-        throw new NotImplementedException("Implement ConnectAsync() - see TODO in comments above");
-    }
+        try
+        {
+            Disconnect(); // if already connected, disconnect first toa avoid leaked loops/resources
 
+            _cancellationTokenSource = new CancellationTokenSource();
+            var cancel_token = _cancellationTokenSource.Token;
+
+            _client = new TcpClient();
+
+            await _client.ConnectAsync(host, port); // ConnectAsync does not take a CancellationToken in older .NET
+
+            _stream = _client.GetStream();
+            _serverEndpoint = _client.Client.RemoteEndPoint?.ToString() ?? $"{host}:{port}";
+            OnConnected?.Invoke(_serverEndpoint);
+
+            _ = Task.Run(ReceiveAsync, cancel_token); // start receive loop in background
+            return true;
+        } catch(Exception ex)
+        {
+            Console.WriteLine($"[Client] Error connecting to {host}:{port} - {ex.Message}");
+            Disconnect();
+            return false;
+        }
+    }
+ 
     /// <summary>
     /// Receive loop - runs on background thread.
     /// Uses length-prefix framing: 4 bytes for length, then JSON payload.
