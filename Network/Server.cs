@@ -64,7 +64,26 @@ public class Server
     /// </summary>
     public void Start(int port)
     {
-        throw new NotImplementedException("Implement Start() - see TODO in comments above");
+        try
+        {
+            if(IsListening)  // if already listening, stop so no leak tasks/sockets
+            {
+                Stop();
+            }
+            Port = port;
+            _cancellationTokenSource = new CancellationTokenSource();
+            _listener = new TcpListener(IPAddress.Any, port);
+            _listener.Start();
+
+            IsListening = true;
+
+            _ = Task.Run(AcceptClientsAsync); // start accept loop in background
+            Console.WriteLine($"Server listening on port {port}");
+        } catch(Exception ex)
+        {
+            Console.WriteLine($"Error starting server on port {port}: {ex.Message}");
+            Stop();
+        }
     }
 
     /// <summary>
