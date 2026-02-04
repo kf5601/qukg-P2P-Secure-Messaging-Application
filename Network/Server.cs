@@ -19,6 +19,7 @@
 
 using System.Net;
 using System.Net.Sockets;
+using System.Text.Json;
 using SecureMessenger.Core;
 
 namespace SecureMessenger.Network;
@@ -161,7 +162,70 @@ public class Server
     /// </summary>
     private async Task ReceiveFromClientAsync(TcpClient client, string endpoint)
     {
-        throw new NotImplementedException("Implement ReceiveFromClientAsync() - see TODO in comments above");
+        var cancel_token = _cancellationTokenSource?.Token ?? CancellationToken.None;
+        try
+        {
+            using NetworkStream stream = client.GetStream();
+            byte[] lengthBuffer = new byte[4];
+            while(!cancel_token.IsCancellationRequested && client.Connected)
+            {
+                // Read 4 bytes for message length
+                bool lengthRead = await ReadExactAsync(stream, lengthBuffer, 4, cancel_token);
+                if(!lengthRead)
+                {
+                    break; // client disconnected
+                }
+                int messageLength = BitConverter.ToInt32(lengthBuffer, 0);
+                if(messageLength <= 0 || messageLength > 1_000_000)
+                {
+                    Console.WriteLine($"Invalid message length {messageLength} from {endpoint}");
+                    break;
+                }
+
+                // Read the full message payload
+                byte[] payloadBuffer = new byte[messageLength];
+                bool payloadRead = await ReadExactAsync(stream, payloadBuffer, messageLength, cancel_token);
+                if(!payloadRead)
+                {
+                    break; // client disconnected
+                }
+
+                string json = System.Text.Encoding.UTF8.GetString(payloadBuffer);
+                Message? message = null;
+                try
+                {
+                    message = JsonSerializer.Deserialize<Message>(json);
+                } catch(Exception ex)
+                {
+                    Console.WriteLine($"Error deserializing message from {endpoint}: {ex.Message}");
+                    continue;
+                }
+
+                if(message != null)
+                {
+                    OnMessageReceived?.Invoke(message);
+                }
+            }
+        } catch (OperationCanceledException)
+        {
+            // Normal shutdown
+        }
+        catch (ObjectDisposedException)
+        {
+            // Stream disposed during shutdown
+        }
+        catch (IOException)
+        {
+            // Connection reset/closed
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Server] Receive loop error from {endpoint}: {ex.Message}");
+        }
+        finally
+        {
+            DisconnectClient(client, endpoint);
+        }
     }
 
     /// <summary>
