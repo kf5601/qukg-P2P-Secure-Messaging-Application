@@ -17,6 +17,7 @@
 //               add heartbeat monitoring and reconnection support
 //
 
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
@@ -114,11 +115,15 @@ public class Server
                 TcpClient client;
                 try
                 {
-                    client = await _listener.AcceptTcpClientAsync(cancel_token);
+                    client = await _listener.AcceptTcpClientAsync();
                 }
-                catch(OperationCanceledException)
+                catch(ObjectDisposedException)
                 {
                     break; // normal shutdown
+                }
+                catch (SocketException)
+                {
+                    break; // listener stopped / interrupted
                 }
                 var endpoint = client.Client.RemoteEndPoint?.ToString() ?? "unknown";
                 lock(_clientsLock)
@@ -176,7 +181,7 @@ public class Server
                     break; // client disconnected
                 }
                 int messageLength = BitConverter.ToInt32(lengthBuffer, 0);
-                if(messageLength <= 0 || messageLength > 1_000_000)
+                if(messageLength <= 0 || messageLength >= 1_000_000)
                 {
                     Console.WriteLine($"Invalid message length {messageLength} from {endpoint}");
                     break;
@@ -273,7 +278,30 @@ public class Server
     /// </summary>
     public void Broadcast(Message message)
     {
-        throw new NotImplementedException("Implement Broadcast() - see TODO in comments above");
+        string json = JsonSerializer.Serialize(message);
+        byte[] payload = System.Text.Encoding.UTF8.GetBytes(json);
+        byte[] lengthPrefix = BitConverter.GetBytes(payload.Length);    
+
+        List<TcpClient> clientsCopy;
+        lock(_clientsLock)
+        {
+            clientsCopy = _clients.ToList();
+        }
+        foreach(TcpClient client in clientsCopy)
+        {
+            try
+            {
+                NetworkStream stream = client.GetStream();
+                stream.Write(lengthPrefix, 0, 4);
+                stream.Write(payload, 0, payload.Length);
+                stream.Flush();
+            } catch (Exception ex)
+            {
+                Console.WriteLine($"Error broadcasting to client: {ex.Message}");
+                var endpoint = client.Client.RemoteEndPoint?.ToString() ?? "unknown";
+                DisconnectClient(client, endpoint);
+            }
+        }
     }
 
     /// <summary>
@@ -288,7 +316,28 @@ public class Server
     /// </summary>
     public void Stop()
     {
-        throw new NotImplementedException("Implement Stop() - see TODO in comments above");
+        try { _cancellationTokenSource?.Cancel(); } catch { }
+        try { _listener?.Stop(); } catch { }
+
+        IsListening = false;
+
+        List<TcpClient> snapshot;
+        lock (_clientsLock)
+        {
+            snapshot = _clients.ToList();
+            _clients.Clear();
+        }
+
+        foreach (var client in snapshot)
+        {
+            var ep = client.Client.RemoteEndPoint?.ToString() ?? "unknown";
+            try { client.Close(); client.Dispose(); } catch { }
+        }
+
+        _listener = null;
+        _cancellationTokenSource = null;
+        Port = 0;
+        Console.WriteLine("Server stopped");
     }
 
     /// <summary>
