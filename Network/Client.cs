@@ -1,4 +1,4 @@
-// [Your Name Here]
+// Quang Huynh (qth9368)
 // CSCI 251 - Secure Distributed Messenger
 //
 // SPRINT 1: Threading & Basic Networking
