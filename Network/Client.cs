@@ -331,7 +331,7 @@ public class Client
             int read = await stream.ReadAsync(buffer, offset, count - offset, ct);
             if (read == 0)
             {
-                return false; // remote closed
+                return false; // remote closed 
             }
             offset += read;
         }
