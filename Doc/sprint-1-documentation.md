@@ -64,7 +64,7 @@
 
 ### Building the Project
 ```
-[Commands to build the project]
+dotnet build
 ```
 
 ---
@@ -73,7 +73,7 @@
 
 ### Starting the Application
 ```
-[Commands to run the application]
+dotnet run
 ```
 
 ### Command Line Arguments (if any)
@@ -97,12 +97,18 @@
 ## Architecture Overview
 
 ### Threading Model
-[Describe your threading approach - which threads exist and what each does]
+Sprint 1 uses background Tasks to prevent blocking the UI thread and to keep networking responsive
 
-- **Main Thread:** [Purpose]
-- **Receive Thread:** [Purpose]
+- **Main Thread:** 
+    - Runs the console loop, reads user commands
+    - Calls `Server.Start`, `Client.ConnectAsync`, `Client.Send`, `Server.Broadcas`t, `Stop`, `Disconnect`
+    - Handles events from networking and prints output
+- **Receive Thread:** 
+    - `AcceptClientsAsync` runs in a background Task
+    -  Accepts incoming TCP clients and fires `OnClientConnected(endpoint)`
+    - Spawns a per client receive Task
 - **Send Thread:** [Purpose]
-- [Additional threads...]
+- **Receive Thread:** [Purpose] 
 
 ### Thread-Safe Message Queue
 [Describe your message queue implementation and synchronization approach]

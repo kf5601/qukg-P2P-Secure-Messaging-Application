@@ -22,6 +22,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
 using SecureMessenger.Core;
+using System.IO;
+using System.Threading;
 
 namespace SecureMessenger.Network;
 

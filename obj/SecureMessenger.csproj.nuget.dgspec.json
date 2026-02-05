@@ -1,20 +1,24 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\user\\Desktop\\group 26 copads\\SecureMessenger.csproj": {}
+    "C:\\Users\\Quang\\Desktop\\rit third year\\Spring 2026\\CSCI 251 (COPADS)\\Group Assignment\\SecureMessenger.csproj": {}
   },
   "projects": {
-    "C:\\Users\\user\\Desktop\\group 26 copads\\SecureMessenger.csproj": {
+    "C:\\Users\\Quang\\Desktop\\rit third year\\Spring 2026\\CSCI 251 (COPADS)\\Group Assignment\\SecureMessenger.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\user\\Desktop\\group 26 copads\\SecureMessenger.csproj",
+        "projectUniqueName": "C:\\Users\\Quang\\Desktop\\rit third year\\Spring 2026\\CSCI 251 (COPADS)\\Group Assignment\\SecureMessenger.csproj",
         "projectName": "SecureMessenger",
-        "projectPath": "C:\\Users\\user\\Desktop\\group 26 copads\\SecureMessenger.csproj",
-        "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\user\\Desktop\\group 26 copads\\obj\\",
+        "projectPath": "C:\\Users\\Quang\\Desktop\\rit third year\\Spring 2026\\CSCI 251 (COPADS)\\Group Assignment\\SecureMessenger.csproj",
+        "packagesPath": "C:\\Users\\Quang\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Quang\\Desktop\\rit third year\\Spring 2026\\CSCI 251 (COPADS)\\Group Assignment\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Quang\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -61,7 +65,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.310/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.307/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
