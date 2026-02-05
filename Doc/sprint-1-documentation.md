@@ -59,8 +59,8 @@
 ## Build Instructions
 
 ### Prerequisites
-- [List required software, e.g., .NET SDK version]
-- [Any other dependencies]
+- .NET 9.0 SDK or later
+- No additional external dependencies
 
 ### Building the Project
 ```
@@ -99,19 +99,46 @@ dotnet run
 ### Threading Model
 Sprint 1 uses background Tasks to prevent blocking the UI thread and to keep networking responsive
 
-- **Main Thread:** 
+- **Main Thread:**
     - Runs the console loop, reads user commands
-    - Calls `Server.Start`, `Client.ConnectAsync`, `Client.Send`, `Server.Broadcas`t, `Stop`, `Disconnect`
+    - Calls `Server.Start`, `Client.ConnectAsync`, `Client.Send`, `Server.Broadcast`, `Stop`, `Disconnect`
     - Handles events from networking and prints output
-- **Receive Thread:** 
+    - Remains non-blocking so the UI stays responsive during networking activity
+- **Receive Thread:**
     - `AcceptClientsAsync` runs in a background Task
-    -  Accepts incoming TCP clients and fires `OnClientConnected(endpoint)`
-    - Spawns a per client receive Task
-- **Send Thread:** [Purpose]
-- **Receive Thread:** [Purpose] 
+    - Accepts incoming TCP clients and fires `OnClientConnected(endpoint)`
+    - Spawns a per-client receive Task to handle incoming messages independently
+- **Send Thread:**
+    - Client send operations are protected with `SemaphoreSlim`
+    - Prevents concurrent writes to the same TCP stream
+    - Uses asynchronous writes to avoid blocking other threads
+- **Server Accept Task:**
+    - `AcceptClientsAsync` runs on a background Task after `/listen`
+    - Waits for incoming TCP connections using `TcpListener`
+    - Adds each client to a shared list protected by `lock`
+    - Fires `OnClientConnected(endpoint)` to notify the main thread
+    - Starts a dedicated receive Task for each connected client
+- **Per-Client Receive Tasks (Server Side):**
+    - Continuously reads framed messages (4-byte length prefix + JSON payload)
+    - Handles partial reads, validates message size, and safely deserializes data
+    - Fires `OnMessageReceived(message)` for UI display
+    - On disconnect or error, removes the client, disposes resources, and fires `OnClientDisconnected`
+- **Client Receive Task:**
+    - Starts after a successful `/connect`
+    - Runs in the background reading framed messages from the server
+    - Uses cancellation tokens for clean shutdown
+    - Prevents crashes from malformed data or unexpected disconnects
+    - Ensures disconnect events fire only once
+- **Shutdown Behavior:**
+    - Cancellation tokens signal all background Tasks to stop
+    - Stopping the listener safely exits the accept loop
+    - Streams and sockets are disposed to prevent resource leaks
+    - Disconnect events notify the UI for a clean application exit
+
 
 ### Thread-Safe Message Queue
 [Describe your message queue implementation and synchronization approach]
+# TODO
 
 ---
 
@@ -119,8 +146,8 @@ Sprint 1 uses background Tasks to prevent blocking the UI thread and to keep net
 
 - [ ] Multi-threaded architecture
 - [ ] Thread-safe message queue
-- [ ] TCP server (listen for connections)
-- [ ] TCP client (connect to peers)
+- [$\checkmark$] TCP server (listen for connections)
+- [$\checkmark$] TCP client (connect to peers)
 - [ ] Send/receive text messages
 - [ ] Graceful disconnection handling
 - [ ] Console UI with commands
