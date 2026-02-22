@@ -1,4 +1,4 @@
-// [Your Name Here]
+// Kai Fan
 // CSCI 251 - Secure Distributed Messenger
 // Group Project
 //
