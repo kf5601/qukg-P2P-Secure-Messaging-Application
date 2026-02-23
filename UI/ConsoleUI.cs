@@ -1,4 +1,4 @@
-// [Your Name Here]
+// Kai Fan
 // CSCI 251 - Secure Distributed Messenger
 //
 // SPRINT 1: Threading & Basic Networking
@@ -26,37 +26,42 @@ public class ConsoleUI
     /// <summary>
     /// Display a received message to the console.
     ///
-    /// TODO: Implement the following:
+    /// Implement the following:
     /// 1. Format the message nicely, e.g.: "[14:30:25] Alice: Hello!"
     /// 2. Use message.Timestamp.ToString("HH:mm:ss") for time format
     /// 3. Print to console
     /// </summary>
     public void DisplayMessage(Message message)
     {
-        throw new NotImplementedException("Implement DisplayMessage() - see TODO in comments above");
+        string formattedTimestamp = message.Timestamp.ToString("HH:mm:ss");
+        Console.WriteLine($"[{formattedTimestamp}] {message.Sender}: {message.Content}");
     }
 
     /// <summary>
     /// Display a system message to the console.
-    ///
-    /// TODO: Implement the following:
+    /// Implement the following:
     /// 1. Print in a distinct format, e.g.: "[System] Server started on port 5000"
     /// </summary>
     public void DisplaySystem(string message)
     {
-        throw new NotImplementedException("Implement DisplaySystem() - see TODO in comments above");
+        Console.WriteLine($"[System] {message}");
     }
 
     /// <summary>
     /// Show available commands to the user.
     ///
-    /// TODO: Implement the following:
+    /// Implement the following:
     /// 1. Print a formatted help message showing all available commands
     /// 2. Include: /connect, /listen, /peers, /history, /quit
     /// </summary>
     public void ShowHelp()
     {
-        throw new NotImplementedException("Implement ShowHelp() - see TODO in comments above");
+        Console.WriteLine("\nAvailable Commands:");
+        Console.WriteLine("  /connect <ip> <port>  - Connect to another messenger");
+        Console.WriteLine("  /listen <port>        - Start listening for connections");
+        Console.WriteLine("  /peers                - Show connection status");
+        Console.WriteLine("  /history              - View message history (Sprint 3)");
+        Console.WriteLine("  /quit or /exit        - Exit the application");
     }
 
     /// <summary>
@@ -84,12 +89,53 @@ public class ConsoleUI
     /// </summary>
     public CommandResult ParseCommand(string input)
     {
-        throw new NotImplementedException("Implement ParseCommand() - see TODO in comments above");
+        // if empty input, return not a command with error message
+        if(input.Length == 0)
+        {
+            return new CommandResult { IsCommand = false, Message = "Error: Empty input"};
+        }
+        // if input doesn't start with '/', it's a regular message
+        if(input[0] != '/')
+        {
+            return new CommandResult { IsCommand = false, Message = input };
+        }
+        string[] parts = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        // switch case for different commands
+        CommandType commandType = parts[0].ToLower() switch
+        {
+            "/connect" => CommandType.Connect,
+            "/listen" => CommandType.Listen,
+            "/peers" => CommandType.Peers,
+            "/history" => CommandType.History,
+            "/help" => CommandType.Help,
+            "/quit" or "/exit" => CommandType.Quit,
+            _ => CommandType.Unknown
+        };
+
+        // validate arguments for connect and listen commands
+        if(commandType == CommandType.Connect && parts.Length != 3)
+        {
+            return new CommandResult { IsCommand = true, CommandType = CommandType.Unknown, Message = "Error: /connect requires 2 arguments (host and port)" };
+        }
+        if(commandType == CommandType.Listen && parts.Length != 2)
+        {
+            return new CommandResult { IsCommand = true, CommandType = CommandType.Unknown, Message = "Error: /listen requires 1 argument (port)" };
+        }
+
+        // process returning command result with args
+        return new CommandResult
+        {
+            IsCommand = true,
+            CommandType = commandType,
+            Args = parts.Skip(1).ToArray() // skip the command itself and return the rest as args
+        };
     }
 }
 
 /// <summary>
 /// Types of commands the user can enter
+/// bruh why is this here??? shouldn't it be at the top
 /// </summary>
 public enum CommandType
 {
