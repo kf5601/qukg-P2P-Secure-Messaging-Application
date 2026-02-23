@@ -70,40 +70,26 @@ class Program
         Console.WriteLine("============================");
 
         // Initialize components
-        Server _server = new Server();
-        Client _client = new Client();
-        ConsoleUI _ui = new ConsoleUI();
-        // MessageQueue _queue = new MessageQueue();
+        _server = new Server();
+        _client = new Client();
+        _ui = new ConsoleUI();
+        // _queue = new MessageQueue(); CODE FOR SPRINT 3
+
         // 1. Create Server for incoming connections
         // 2. Create Client for outgoing connection
         // 3. Create ConsoleUI for user interface
         // 4. (Optional) Create MessageQueue if using producer/consumer pattern
 
         // TODO: Subscribe to events
-
         // Server events:
-        _server.OnClientDisconnected += endpoint =>
-        {
-            Console.WriteLine($"Client disconnected: {endpoint}");
-        };
-        _server.OnMessageReceived += message =>
-        {
-            Console.WriteLine($"Message received from {message.Sender}: {message.Content}");
-        };
+        _server.OnClientConnected += peer => _ui.DisplaySystem($"Client {peer} connected");
+        _server.OnClientDisconnected += peer => _ui.DisplaySystem($"Client {peer} disconnected");
+        _server.OnMessageReceived += msg => _ui.DisplayMessage(msg);
 
         // Client events:
-        _client.OnConnected += endpoint =>
-        {
-            Console.WriteLine($"Connected to server: {endpoint}");
-        };
-        _client.OnDisconnected += endpoint =>
-        {
-            Console.WriteLine($"Disconnected from server: {endpoint}");
-        };
-        _client.OnMessageReceived += message =>
-        {
-            Console.WriteLine($"Message received from server: {message.Content}");
-        };
+        _client.OnConnected += EndPoint => _ui.DisplaySystem($"Connected to server {EndPoint}");
+        _client.OnDisconnected += EndPoint => _ui.DisplaySystem($"Disconnected from server {EndPoint}");
+        _client.OnMessageReceived += msg => _ui.DisplayMessage(msg);
 
         Console.WriteLine("Type /help for available commands");
         Console.WriteLine();
@@ -127,18 +113,37 @@ class Program
             var input = Console.ReadLine();
             if (string.IsNullOrEmpty(input)) continue;
 
-            // Temporary basic command handling - replace with full implementation
-            switch (input.ToLower())
+            // this is the resuult from ui.ParseCommand, which might only return regular message
+            var result = _ui.ParseCommand(input);
+            if (!result.IsCommand)
             {
-                case "/quit":
-                case "/exit":
+                await SendMessageAsync(result.Message);
+                continue;
+            }
+
+            // processing command and actually executing it
+            switch (result.CommandType)
+            {
+                case CommandType.Help:
+                    _ui.ShowHelp();
+                    break;
+                case CommandType.Quit:
                     running = false;
                     break;
-                case "/help":
-                    ShowHelp();
+                case CommandType.Listen:
+                    HandleListen(result.Args);
                     break;
-                default:
-                    Console.WriteLine("Command not yet implemented. See TODO comments.");
+                case CommandType.Connect:
+                    await HandleConnectAsync(result.Args);
+                    break;
+                case CommandType.Peers:
+                    HandlePeers();
+                    break;
+                //this case is for sprint 3
+                //case CommandType.History:
+                //    HandleHistory();
+                case CommandType.Unknown:
+                    _ui.DisplaySystem(result.Message ?? "Unknown command");
                     break;
             }
         }
@@ -173,8 +178,47 @@ class Program
 
     // TODO: Add helper methods as needed
     // Examples:
-    // - HandleListen(string[] args) - start the server
-    // - HandleConnect(string[] args) - connect to a server
-    // - HandlePeers() - show connection status
-    // - SendMessage(string content) - send to all connections
+    private static void HandleListen(string[] args)
+    {
+        if(args.Length != 1)
+        {
+            _ui!.DisplaySystem("Error: /listen requires 1 argument (port)"); // ! is for null forgiveness, no squiggly yellow line
+            return;
+        }
+        int port = int.Parse(args[0]);
+        _server!.Start(port); // ! is for null forgiveness, no squiggly yellow line
+        _ui!.DisplaySystem($"Started listening on port {port}"); // ! is for null forgiveness, no squiggly yellow line  
+    }
+
+    private static async void HandleConnectAsync(string[] args)
+    {
+        if(args.Length != 2)
+        {
+            _ui!.DisplaySystem("Error: /connect requires 2 arguments (host and port)"); // ! is for null forgiveness, no squiggly yellow line
+            return;
+        }
+        string host = args[0]; // ip address or hostname
+        int port = int.Parse(args[1]); // port number
+        await _client!.ConnectAsync(host, port); // ! is for null forgiveness, no squiggly yellow line
+    }
+    private static void HandlePeers()
+    {
+        _ui!.DisplaySystem($"Server is listening?: {_server!.IsListening}"); // ! is for null forgiveness, no squiggly yellow line
+        _ui.DisplaySystem($"Client Connected ?: {_client!.IsConnected}"); // ! is for null forgiveness, no squiggly yellow line
+    }
+    private static Message SendMessageAsync(string content)
+    {
+        if (content.Length == 0)
+        {
+            _ui!.DisplaySystem("Error: Cannot send empty message"); // ! is for null forgiveness, no squiggly yellow line
+            return new Message { Sender = _username, Content = "Error: Empty message", Timestamp = DateTime.Now };
+        }
+        Message msg = new Message
+        {
+            Sender = _username,
+            Content = content,
+            Timestamp = DateTime.Now
+        };
+        return msg;
+    }
 }
