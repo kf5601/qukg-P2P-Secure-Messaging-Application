@@ -53,11 +53,11 @@ namespace SecureMessenger;
 class Program
 {
     // TODO: Declare your components as fields for access across methods
-    // Sprint 1-2 components:
-    // private static Server? _server;
-    // private static Client? _client;
-    // private static ConsoleUI? _ui;
-    // private static string _username = "User";
+    //Sprint 1-2 components:
+    private static Server? _server;
+    private static Client? _client;
+    private static ConsoleUI? _ui;
+    private static string _username = "User";
     //
     // Sprint 3 additions:
     // private static PeerDiscovery? _peerDiscovery;
@@ -68,15 +68,19 @@ class Program
         Console.WriteLine("Secure Distributed Messenger");
         Console.WriteLine("============================");
 
-        // TODO: Initialize components
+        // Initialize components
+        Server server = new Server();
+        Client client = new Client();
+        ConsoleUI ui = new ConsoleUI();
+        MessageQueue queue = new MessageQueue();
         // 1. Create Server for incoming connections
         // 2. Create Client for outgoing connection
         // 3. Create ConsoleUI for user interface
         // 4. (Optional) Create MessageQueue if using producer/consumer pattern
 
         // TODO: Subscribe to events
+        
         // Server events:
-        // - _server.OnClientConnected += endpoint => { ... };
         // - _server.OnClientDisconnected += endpoint => { ... };
         // - _server.OnMessageReceived += message => { ... };
         //
