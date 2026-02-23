@@ -8,6 +8,8 @@
 //
 
 using System.Net;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using SecureMessenger.Core;
 using SecureMessenger.Network;
 using SecureMessenger.Security;
@@ -98,7 +100,7 @@ class Program
         bool running = true;
         while (running)
         {
-            // TODO: Implement the main input loop
+            // Implement the main input loop
             // 1. Read a line from the console
             // 2. Skip empty input
             // 3. Parse the input using ConsoleUI.ParseCommand()
@@ -111,12 +113,17 @@ class Program
             //    - Not a command: Send as a message
 
             var input = Console.ReadLine();
-            if (string.IsNullOrEmpty(input)) continue;
+            if (string.IsNullOrWhiteSpace(input)) continue;
 
             // this is the resuult from ui.ParseCommand, which might only return regular message
             var result = _ui.ParseCommand(input);
             if (!result.IsCommand)
             {
+                if(string.IsNullOrWhiteSpace(result.Message))
+                {
+                    _ui.DisplaySystem("Error: Cannot send empty message");
+                    continue;
+                }
                 await SendMessageAsync(result.Message);
                 continue;
             }
@@ -131,9 +138,19 @@ class Program
                     running = false;
                     break;
                 case CommandType.Listen:
+                    if(result.Args is null)
+                    {
+                        _ui!.DisplaySystem("ERROR: Missing Args."); // ! is for null forgiveness, no squiggly yellow line
+                        break;
+                    }
                     HandleListen(result.Args);
                     break;
                 case CommandType.Connect:
+                    if(result.Args is null)
+                    {
+                        _ui!.DisplaySystem("ERROR: Missing Args."); // ! is for null forgiveness, no squiggly yellow line
+                        break;
+                    }
                     await HandleConnectAsync(result.Args);
                     break;
                 case CommandType.Peers:
@@ -148,10 +165,15 @@ class Program
             }
         }
 
-        // TODO: Implement graceful shutdown
+        // Implement graceful shutdown
         // 1. Stop the server
         // 2. Disconnect the client
         // 3. (Sprint 3) Stop peer discovery and heartbeat monitor
+        _server?.Stop(); // ? is for null conditional operator, only call Stop if _server is not null
+        if(_client is not null) // check if client is connected before trying to disconnect
+        {
+            _client.Disconnect();
+        }
 
         Console.WriteLine("Goodbye!");
     }
@@ -160,21 +182,21 @@ class Program
     /// Display help information.
     /// Replace this with ConsoleUI.ShowHelp() once implemented.
     /// </summary>
-    private static void ShowHelp()
-    {
-        Console.WriteLine("\nAvailable Commands:");
-        Console.WriteLine("  /connect <ip> <port>  - Connect to another messenger");
-        Console.WriteLine("  /listen <port>        - Start listening for connections");
-        Console.WriteLine("  /peers                - Show connection status");
-        Console.WriteLine("  /history              - View message history (Sprint 3)");
-        Console.WriteLine("  /quit                 - Exit the application");
-        Console.WriteLine();
-        Console.WriteLine("Sprint Progression:");
-        Console.WriteLine("  Sprint 1: Basic /connect and /listen with message sending");
-        Console.WriteLine("  Sprint 2: Messages are encrypted end-to-end");
-        Console.WriteLine("  Sprint 3: Automatic peer discovery and reconnection");
-        Console.WriteLine();
-    }
+    // private static void ShowHelp()
+    // {
+    //     Console.WriteLine("\nAvailable Commands:");
+    //     Console.WriteLine("  /connect <ip> <port>  - Connect to another messenger");
+    //     Console.WriteLine("  /listen <port>        - Start listening for connections");
+    //     Console.WriteLine("  /peers                - Show connection status");
+    //     Console.WriteLine("  /history              - View message history (Sprint 3)");
+    //     Console.WriteLine("  /quit                 - Exit the application");
+    //     Console.WriteLine();
+    //     Console.WriteLine("Sprint Progression:");
+    //     Console.WriteLine("  Sprint 1: Basic /connect and /listen with message sending");
+    //     Console.WriteLine("  Sprint 2: Messages are encrypted end-to-end");
+    //     Console.WriteLine("  Sprint 3: Automatic peer discovery and reconnection");
+    //     Console.WriteLine();
+    // }
 
     // TODO: Add helper methods as needed
     // Examples:
@@ -186,11 +208,18 @@ class Program
             return;
         }
         int port = int.Parse(args[0]);
+
+        if(!int.TryParse(args[0], out int p))
+        {
+            _ui!.DisplaySystem("Error: Invalid port number, it must be a number!"); // ! is for null forgiveness, no squiggly yellow line
+            return;
+        }
+
         _server!.Start(port); // ! is for null forgiveness, no squiggly yellow line
         _ui!.DisplaySystem($"Started listening on port {port}"); // ! is for null forgiveness, no squiggly yellow line  
     }
 
-    private static async void HandleConnectAsync(string[] args)
+    private static async Task HandleConnectAsync(string[] args)
     {
         if(args.Length != 2)
         {
@@ -199,19 +228,31 @@ class Program
         }
         string host = args[0]; // ip address or hostname
         int port = int.Parse(args[1]); // port number
-        await _client!.ConnectAsync(host, port); // ! is for null forgiveness, no squiggly yellow line
+
+        if(!int.TryParse(args[1], out int p))
+        {
+            _ui!.DisplaySystem("Error: Invalid port number, it must be a number!"); // ! is for null forgiveness, no squiggly yellow line
+            return;
+        }
+
+        bool status = await _client!.ConnectAsync(host, port); // ! is for null forgiveness, no squiggly yellow line
+        if(!status)
+        {
+            _ui!.DisplaySystem($"Error: Failure to connect to {host}:{port}"); // ! is for null forgiveness, no squiggly yellow line
+        }
+        return;
     }
     private static void HandlePeers()
     {
-        _ui!.DisplaySystem($"Server is listening?: {_server!.IsListening}"); // ! is for null forgiveness, no squiggly yellow line
-        _ui.DisplaySystem($"Client Connected ?: {_client!.IsConnected}"); // ! is for null forgiveness, no squiggly yellow line
+        _ui!.DisplaySystem($"Server listenting = {_server!.IsListening}, port = {_server!.Port}, client = {_server!.ClientCount}"); // ! is for null forgiveness, no squiggly yellow line
+        _ui.DisplaySystem($"Client connected = {_client!.IsConnected}"); // ! is for null forgiveness, no squiggly yellow line
     }
-    private static Message SendMessageAsync(string content)
+    private static async Task SendMessageAsync(string content)
     {
         if (content.Length == 0)
         {
             _ui!.DisplaySystem("Error: Cannot send empty message"); // ! is for null forgiveness, no squiggly yellow line
-            return new Message { Sender = _username, Content = "Error: Empty message", Timestamp = DateTime.Now };
+            return;
         }
         Message msg = new Message
         {
@@ -219,6 +260,18 @@ class Program
             Content = content,
             Timestamp = DateTime.Now
         };
-        return msg;
+        if(_client!.IsConnected) // ! is for null forgiveness, no squiggly yellow line
+        {
+            _client.Send(msg);
+        }
+        else if(_server!.IsListening) // ! is for null forgiveness, no squiggly yellow line
+        {
+            _server.Broadcast(msg);
+        }
+        else
+        {
+            _ui!.DisplaySystem("Error: Not connected to any peer. Use /connect or /listen first."); // ! is for null forgiveness, no squiggly yellow line
+        }
+        return;
     }
 }
