@@ -207,13 +207,14 @@ class Program
             _ui!.DisplaySystem("Error: /listen requires 1 argument (port)"); // ! is for null forgiveness, no squiggly yellow line
             return;
         }
-        int port = int.Parse(args[0]);
-
+        // validate port number
         if(!int.TryParse(args[0], out int p))
         {
             _ui!.DisplaySystem("Error: Invalid port number, it must be a number!"); // ! is for null forgiveness, no squiggly yellow line
             return;
         }
+        
+        int port = int.Parse(args[0]);
 
         _server!.Start(port); // ! is for null forgiveness, no squiggly yellow line
         _ui!.DisplaySystem($"Started listening on port {port}"); // ! is for null forgiveness, no squiggly yellow line  
@@ -227,13 +228,14 @@ class Program
             return;
         }
         string host = args[0]; // ip address or hostname
-        int port = int.Parse(args[1]); // port number
-
+        // validate port number
         if(!int.TryParse(args[1], out int p))
         {
             _ui!.DisplaySystem("Error: Invalid port number, it must be a number!"); // ! is for null forgiveness, no squiggly yellow line
             return;
         }
+
+        int port = int.Parse(args[1]); // port number
 
         bool status = await _client!.ConnectAsync(host, port); // ! is for null forgiveness, no squiggly yellow line
         if(!status)
