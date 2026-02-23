@@ -7,6 +7,7 @@
 // (Continue enhancing in Sprints 2 & 3)
 //
 
+using System.Net;
 using SecureMessenger.Core;
 using SecureMessenger.Network;
 using SecureMessenger.Security;
@@ -69,25 +70,40 @@ class Program
         Console.WriteLine("============================");
 
         // Initialize components
-        Server server = new Server();
-        Client client = new Client();
-        ConsoleUI ui = new ConsoleUI();
-        MessageQueue queue = new MessageQueue();
+        Server _server = new Server();
+        Client _client = new Client();
+        ConsoleUI _ui = new ConsoleUI();
+        // MessageQueue _queue = new MessageQueue();
         // 1. Create Server for incoming connections
         // 2. Create Client for outgoing connection
         // 3. Create ConsoleUI for user interface
         // 4. (Optional) Create MessageQueue if using producer/consumer pattern
 
         // TODO: Subscribe to events
-        
+
         // Server events:
-        // - _server.OnClientDisconnected += endpoint => { ... };
-        // - _server.OnMessageReceived += message => { ... };
-        //
+        _server.OnClientDisconnected += endpoint =>
+        {
+            Console.WriteLine($"Client disconnected: {endpoint}");
+        };
+        _server.OnMessageReceived += message =>
+        {
+            Console.WriteLine($"Message received from {message.Sender}: {message.Content}");
+        };
+
         // Client events:
-        // - _client.OnConnected += endpoint => { ... };
-        // - _client.OnDisconnected += endpoint => { ... };
-        // - _client.OnMessageReceived += message => { ... };
+        _client.OnConnected += endpoint =>
+        {
+            Console.WriteLine($"Connected to server: {endpoint}");
+        };
+        _client.OnDisconnected += endpoint =>
+        {
+            Console.WriteLine($"Disconnected from server: {endpoint}");
+        };
+        _client.OnMessageReceived += message =>
+        {
+            Console.WriteLine($"Message received from server: {message.Content}");
+        };
 
         Console.WriteLine("Type /help for available commands");
         Console.WriteLine();
