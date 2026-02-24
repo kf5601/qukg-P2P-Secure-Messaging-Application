@@ -51,6 +51,9 @@ public class MessageQueue
     // Option 2: ConcurrentQueue<Message>
     // Option 3: Queue<Message> with lock
 
+BlockingCollection<Message> incomingMessages = new BlockingCollection<Message>();
+BlockingCollection<Message> outgoingMessage = new BlockingCollection<Message>();
+
     /// <summary>
     /// Enqueue an incoming message (received from network).
     ///
@@ -60,7 +63,9 @@ public class MessageQueue
     /// </summary>
     public void EnqueueIncoming(Message message)
     {
-        throw new NotImplementedException("Implement EnqueueIncoming() - see TODO in comments above");
+        // Thread safe .Add method from BlockingCollection
+        incomingMessages.Add(message);
+        // throw new NotImplementedException("Implement EnqueueIncoming() - see TODO in comments above");
     }
 
     /// <summary>
@@ -76,7 +81,8 @@ public class MessageQueue
     /// </summary>
     public Message DequeueIncomingBlocking(CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException("Implement DequeueIncomingBlocking() - see TODO in comments above");
+        return incomingMessages.Take(cancellationToken);
+        // throw new NotImplementedException("Implement DequeueIncomingBlocking() - see TODO in comments above");
     }
 
     /// <summary>
@@ -91,7 +97,8 @@ public class MessageQueue
     /// </summary>
     public bool TryDequeueIncoming(out Message? message)
     {
-        throw new NotImplementedException("Implement TryDequeueIncoming() - see TODO in comments above");
+        return incomingMessages.TryTake(out message);
+        // throw new NotImplementedException("Implement TryDequeueIncoming() - see TODO in comments above");
     }
 
     /// <summary>
@@ -103,7 +110,8 @@ public class MessageQueue
     /// </summary>
     public void EnqueueOutgoing(Message message)
     {
-        throw new NotImplementedException("Implement EnqueueOutgoing() - see TODO in comments above");
+        outgoingMessage.Add(message);
+        // throw new NotImplementedException("Implement EnqueueOutgoing() - see TODO in comments above");
     }
 
     /// <summary>
@@ -117,7 +125,8 @@ public class MessageQueue
     /// </summary>
     public Message DequeueOutgoingBlocking(CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException("Implement DequeueOutgoingBlocking() - see TODO in comments above");
+        return outgoingMessage.Take(cancellationToken);
+        // throw new NotImplementedException("Implement DequeueOutgoingBlocking() - see TODO in comments above");
     }
 
     /// <summary>
@@ -130,7 +139,8 @@ public class MessageQueue
     /// </summary>
     public bool TryDequeueOutgoing(out Message? message)
     {
-        throw new NotImplementedException("Implement TryDequeueOutgoing() - see TODO in comments above");
+        return outgoingMessage.TryTake(out message);
+        // throw new NotImplementedException("Implement TryDequeueOutgoing() - see TODO in comments above");
     }
 
     /// <summary>
@@ -138,14 +148,14 @@ public class MessageQueue
     ///
     /// TODO: Return the count of your incoming queue
     /// </summary>
-    public int IncomingCount => throw new NotImplementedException("Implement IncomingCount property");
+    public int IncomingCount => incomingMessages.Count;
 
     /// <summary>
     /// Get the count of outgoing messages waiting to be sent.
     ///
     /// TODO: Return the count of your outgoing queue
     /// </summary>
-    public int OutgoingCount => throw new NotImplementedException("Implement OutgoingCount property");
+    public int OutgoingCount => outgoingMessage.Count;
 
     /// <summary>
     /// Signal that no more messages will be added.
@@ -158,6 +168,8 @@ public class MessageQueue
     /// </summary>
     public void CompleteAdding()
     {
-        throw new NotImplementedException("Implement CompleteAdding() - see TODO in comments above");
+        incomingMessages.CompleteAdding();
+        outgoingMessage.CompleteAdding();
+        // throw new NotImplementedException("Implement CompleteAdding() - see TODO in comments above");
     }
 }
