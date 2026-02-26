@@ -114,21 +114,21 @@ public class ConsoleUI
         };
 
         // validate arguments for connect and listen commands
-        if(commandType == CommandType.Connect && parts.Length != 3)
+        if (commandType == CommandType.Connect && parts.Length != 4)
         {
-            return new CommandResult { IsCommand = true, CommandType = CommandType.Unknown, Message = "Error: /connect requires 2 arguments (host and port)" };
+            return new CommandResult { IsCommand = true, CommandType = CommandType.Unknown, Message = "Error: /connect requires 3 arguments (host, port, and name)" };
         }
-        if(commandType == CommandType.Listen && parts.Length != 2)
+        
+        if (commandType == CommandType.Listen && parts.Length != 2)
         {
             return new CommandResult { IsCommand = true, CommandType = CommandType.Unknown, Message = "Error: /listen requires 1 argument (port)" };
         }
 
-        // process returning command result with args
         return new CommandResult
         {
             IsCommand = true,
             CommandType = commandType,
-            Args = parts.Skip(1).ToArray() // skip the command itself and return the rest as args
+            Args = parts.Skip(1).ToArray() 
         };
     }
 }

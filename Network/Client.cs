@@ -75,33 +75,40 @@ public class Client
     /// Sprint 3: This will be enhanced to create a Peer object and
     /// register it with the connection manager for reconnection support.
     /// </summary>
-    public async Task<bool> ConnectAsync(string host, int port)
+public async Task<bool> ConnectAsync(string host, int port, string myName)
+{
+    try
     {
-        try
-        {
-            Disconnect(); // if already connected, disconnect first toa avoid leaked loops/resources
+        Disconnect(); 
 
-            _cancellationTokenSource = new CancellationTokenSource();
-            var cancel_token = _cancellationTokenSource.Token;
+        _cancellationTokenSource = new CancellationTokenSource();
+        var cancel_token = _cancellationTokenSource.Token;
 
-            _client = new TcpClient();
+        _client = new TcpClient();
 
-            await _client.ConnectAsync(host, port); // ConnectAsync does not take a CancellationToken in older .NET
+        await _client.ConnectAsync(host, port); 
+        _stream = _client.GetStream();
+        _serverEndpoint = _client.Client.RemoteEndPoint?.ToString() ?? $"{host}:{port}";
+        Interlocked.Exchange(ref _disconnectedFire, 0); 
+        OnConnected?.Invoke(_serverEndpoint);
+        var identity = new Message 
+        { 
+            Sender = myName, 
+            Content = "has joined the conversation", 
+            Type = MessageType.Text 
+        };
+        Send(identity);
 
-            _stream = _client.GetStream();
-            _serverEndpoint = _client.Client.RemoteEndPoint?.ToString() ?? $"{host}:{port}";
-            Interlocked.Exchange(ref _disconnectedFire, 0); // reset disconnected event flag
-            OnConnected?.Invoke(_serverEndpoint);
-
-            _ = Task.Run(ReceiveAsync, cancel_token); // start receive loop in background
-            return true;
-        } catch(Exception ex)
-        {
-            Console.WriteLine($"[Client] Error connecting to {host}:{port} - {ex.Message}");
-            Disconnect();
-            return false;
-        }
+        _ = Task.Run(ReceiveAsync, cancel_token); 
+        return true;
+    } 
+    catch(Exception ex)
+    {
+        Console.WriteLine($"[Client] Error connecting to {host}:{port} - {ex.Message}");
+        Disconnect();
+        return false;
     }
+}
  
     /// <summary>
     /// Receive loop - runs on background thread.
