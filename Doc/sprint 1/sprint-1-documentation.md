@@ -162,7 +162,7 @@ Sprint 1 uses background Tasks to prevent blocking the UI thread and to keep net
 | Two instances can connect | Connection established; server shows “Client … connected”; client shows “Connected to server …” | Both client instances connected successfully; server logged connection messages; client displayed “Connected to server …” | Pass |
 | Messages sent and received | Text from A appears on B (and vice versa) with correct timestamp/sender | Messages were exchanged correctly between clients with proper timestamps and sender labels | Pass |
 | Disconnection handled | Closing either side logs a single disconnect event; other side keeps running | Disconnecting one client logged a single disconnect event; the other client continued running without issues. Both have proper messages to indicate whether or not a disconnect happened | Pass |
-| Thread safety under load | Rapid sends do not freeze UI or crash; no duplicate/missing messages observed | Pending | Pass |
+| Thread safety under load | Rapid sends do not freeze UI or crash & no duplicate/missing messages observed | Rapid message sending was tested between clients; the UI remained responsive with no crashes. All messages were delivered without duplication or loss, and ordering remained consistent. | Pass |
 
 
 ---
