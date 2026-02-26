@@ -222,27 +222,27 @@ class Program
 
     private static async Task HandleConnectAsync(string[] args)
     {
-        if(args.Length != 2)
+        if(args.Length != 3)
         {
-            _ui!.DisplaySystem("Error: /connect requires 2 arguments (host and port)"); // ! is for null forgiveness, no squiggly yellow line
-            return;
-        }
-        string host = args[0]; // ip address or hostname
-        // validate port number
-        if(!int.TryParse(args[1], out int p))
-        {
-            _ui!.DisplaySystem("Error: Invalid port number, it must be a number!"); // ! is for null forgiveness, no squiggly yellow line
+            _ui!.DisplaySystem("Error: /connect requires 3 arguments (host, port, and name)"); 
             return;
         }
 
-        int port = int.Parse(args[1]); // port number
+        string host = args[0];
+        if(!int.TryParse(args[1], out int port))
+        {
+            _ui!.DisplaySystem("Error: Invalid port number!"); 
+            return;
+        }
 
-        bool status = await _client!.ConnectAsync(host, port); // ! is for null forgiveness, no squiggly yellow line
+        string myName = args[2];
+        _username = myName;
+
+        bool status = await _client!.ConnectAsync(host, port, myName); 
         if(!status)
         {
-            _ui!.DisplaySystem($"Error: Failure to connect to {host}:{port}"); // ! is for null forgiveness, no squiggly yellow line
+            _ui!.DisplaySystem($"Error: Failure to connect to {host}:{port}"); 
         }
-        return;
     }
     private static void HandlePeers()
     {
