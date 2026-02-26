@@ -11,7 +11,7 @@ CSCI 251: Concepts of Parallel and Distributed Systems
 
 ### Building the Project
 ```bash
-dotnet build
+dotnet build SecureMessenger.csproj
 ```
 
 Or for a release build:
