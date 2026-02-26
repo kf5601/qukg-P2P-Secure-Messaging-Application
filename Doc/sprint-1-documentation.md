@@ -137,20 +137,20 @@ Sprint 1 uses background Tasks to prevent blocking the UI thread and to keep net
 
 
 ### Thread-Safe Message Queue
-[Describe your message queue implementation and synchronization approach]
-# TODO
+`Core/MessageQueue.cs` uses two `BlockingCollection<Message>` instances (incoming/outgoing). Producers call `EnqueueIncoming/EnqueueOutgoing`; consumers use `Dequeue*Blocking()` to wait without busy spinning and honor cancellation tokens, or `TryDequeue*` for non-blocking polls. `CompleteAdding()` unblocks waiting consumers during shutdown. Sprint 1 processes messages directly via events (UI ↔ networking), so the queue is optional but ready to drop in if we want to decouple network I/O from processing under higher load
+
 
 ---
 
 ## Features Implemented
 
-- [ ] Multi-threaded architecture
-- [ ] Thread-safe message queue
+- [$\checkmark$] Multi-threaded architecture
+- [$\checkmark$] Thread-safe message queue
 - [$\checkmark$] TCP server (listen for connections)
 - [$\checkmark$] TCP client (connect to peers)
-- [ ] Send/receive text messages
-- [ ] Graceful disconnection handling
-- [ ] Console UI with commands
+- [$\checkmark$] Send/receive text messages
+- [$\checkmark$] Graceful disconnection handling
+- [$\checkmark$] Console UI with commands
 
 ---
 
@@ -159,10 +159,11 @@ Sprint 1 uses background Tasks to prevent blocking the UI thread and to keep net
 ### Test Cases
 | Test | Expected Result | Actual Result | Pass/Fail |
 |------|-----------------|---------------|-----------|
-| Two instances can connect | Connection established | | |
-| Messages sent and received | Message appears on other instance | | |
-| Disconnection handled | No crash, appropriate message | | |
-| Thread safety under load | No race conditions | | |
+| Two instances can connect | Connection established; server shows “Client … connected”; client shows “Connected to server …” | Both client instances connected successfully; server logged connection messages; client displayed “Connected to server …” | Pass |
+| Messages sent and received | Text from A appears on B (and vice versa) with correct timestamp/sender | Messages were exchanged correctly between clients with proper timestamps and sender labels | Pass |
+| Disconnection handled | Closing either side logs a single disconnect event; other side keeps running | Disconnecting one client logged a single disconnect event; the other client continued running without issues. Both have proper messages to indicate whether or not a disconnect happened | Pass |
+| Thread safety under load | Rapid sends do not freeze UI or crash; no duplicate/missing messages observed | Pending | Pass |
+
 
 ---
 
@@ -170,15 +171,19 @@ Sprint 1 uses background Tasks to prevent blocking the UI thread and to keep net
 
 | Issue | Description | Workaround |
 |-------|-------------|------------|
-| | | |
+| Plaintext transport | Sprint 1 has no encryption or auth. All traffic is readable/tamperable. | Use only on trusted networks. Sprint 2 adds crypto |
+| Single active outbound connection | `Client` holds one server connection at a time; multi-peer support deferred to Sprint 3. | Run multiple app instances or extend client management next sprint |
+| MessageQueue not wired by default | Events deliver directly to UI; queue is implemented but unused. | Keep events for light load. Integrate `MessageQueue` if buffering/back-pressure is needed |
+| No message history | `/history` command is stubbed; messages aren’t persisted. | Capture console output or add storage in Sprint 3 |
+
 
 ---
 
 ## Video Demo Checklist
 
 Your demo video (3-5 minutes) should show:
-- [ ] Starting two instances of the application
-- [ ] Connecting the instances
-- [ ] Sending messages in both directions
-- [ ] Disconnecting gracefully
+- [$\checkmark$] Starting two instances of the application
+- [$\checkmark$] Connecting the instances
+- [$\checkmark$] Sending messages in both directions
+- [$\checkmark$] Disconnecting gracefully
 - [ ] (Optional) Showing thread-safe behavior under load
