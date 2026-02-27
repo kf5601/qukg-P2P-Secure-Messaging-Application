@@ -185,7 +185,7 @@ class Program
     // private static void ShowHelp()
     // {
     //     Console.WriteLine("\nAvailable Commands:");
-    //     Console.WriteLine("  /connect <ip> <port>  - Connect to another messenger");
+    //     Console.WriteLine("  /connect <ip> <port> <name>  - Connect to another messenger");
     //     Console.WriteLine("  /listen <port>        - Start listening for connections");
     //     Console.WriteLine("  /peers                - Show connection status");
     //     Console.WriteLine("  /history              - View message history (Sprint 3)");

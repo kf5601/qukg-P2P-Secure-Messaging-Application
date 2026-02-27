@@ -211,6 +211,7 @@ public class Server
                 if(message != null)
                 {
                     OnMessageReceived?.Invoke(message);
+                    Broadcast(message); // echo to all clients (including sender)
                 }
             }
         } catch (OperationCanceledException)
