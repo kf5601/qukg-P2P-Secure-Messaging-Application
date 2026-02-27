@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SecureMessenger")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+565c4ec7586f7714047a742a52245157223b1c7a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1b096ce043d931e68611a6cc26071d1af0799ca7")]
 [assembly: System.Reflection.AssemblyProductAttribute("SecureMessenger")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SecureMessenger")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

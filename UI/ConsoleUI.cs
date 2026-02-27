@@ -14,7 +14,7 @@ namespace SecureMessenger.UI;
 /// Handles user input parsing and message display.
 ///
 /// Supported Commands:
-/// - /connect host port  - Connect to another messenger
+/// - /connect host port name  - Connect to another messenger
 /// - /listen port        - Start listening for connections
 /// - /peers              - Show connection status
 /// - /history            - View message history (Sprint 3)
@@ -57,7 +57,7 @@ public class ConsoleUI
     public void ShowHelp()
     {
         Console.WriteLine("\nAvailable Commands:");
-        Console.WriteLine("  /connect <ip> <port>  - Connect to another messenger");
+        Console.WriteLine("  /connect <ip> <port> <name>  - Connect to another messenger");
         Console.WriteLine("  /listen <port>        - Start listening for connections");
         Console.WriteLine("  /peers                - Show connection status");
         Console.WriteLine("  /history              - View message history (Sprint 3)");
