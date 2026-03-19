@@ -4,11 +4,51 @@
 **Team Name:** qukg (Group 26)
 
 **Team Members:**
-- [Name 1] - [Role/Responsibilities]
-- [Name 2] - [Role/Responsibilities]
-- [Name 3] - [Role/Responsibilities]
-- [Name 4] - [Role/Responsibilities]
-- [Name 5] - [Role/Responsibilities]
+- ### Uday Bista | Lead Security & Cryptography Engineer + Demo
+    - Designs and implements full encryption pipeline (AES + RSA)
+    - Implements secure key exchange protocol
+    - Implements message signing and verification
+    - Ensures secure handling of keys and buffers
+    - Maintains threat model and security assumptions
+    - Does demo implementation and test scenarios w/ Grant
+    - **Primary Files:**
+        - `Security/CryptoManager.cs`
+        - `Security/KeyExchange.cs`
+        - `Security/SignatureService.cs`
+
+- ### Kai Fan | Architecture Support & Event Integration 
+    - Updates event flow to support encrypted message lifecycle
+    - Assists with integrating chat rooms into program flow
+    - Maintains clean architecture boundaries between modules
+
+    - **Primary Files:**
+        - `Program.cs`
+        - Event wiring across modules
+
+- ### Quang Huynh | Documentation & Integration Engineer 
+    - Documents Sprint 2 architecture, security protocol, and threat model
+    - Assists with integrating encryption into networking layer
+    - Ensures message framing supports encrypted payloads
+    - Verifies system stability and edge-case handling
+
+    - **Primary Files:**
+        - `Docs/sprint-2-documentation.md`
+        - Minor updates in:
+            - `Network/Server.cs`
+            - `Network/Client.cs`
+
+- ### Grant Keegan | Chat Rooms, UI + Demo
+    - Implements chat room system and command parsing
+    - Integrates encryption flow into UI commands
+    - Handles message routing to correct room members
+    - Does demo implementation and test scenarios w/ Uday
+
+    - **Primary Files:**
+        - `Core/ChatRoomManager.cs`
+        - `UI/ConsoleUI.cs` (extended)
+        - `Core/CommandHandler.cs`
+
+---
 
 **Date:** 03/27/2026
 
