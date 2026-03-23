@@ -8,24 +8,19 @@
     "net9.0": []
   },
   "packageFolders": {
-    "C:\\Users\\Quang\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\user\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Quang\\Desktop\\copads group\\SecureMessenger.csproj",
+      "projectUniqueName": "C:\\Users\\user\\Desktop\\copads\\SecureMessenger.csproj",
       "projectName": "SecureMessenger",
-      "projectPath": "C:\\Users\\Quang\\Desktop\\copads group\\SecureMessenger.csproj",
-      "packagesPath": "C:\\Users\\Quang\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Quang\\Desktop\\copads group\\obj\\",
+      "projectPath": "C:\\Users\\user\\Desktop\\copads\\SecureMessenger.csproj",
+      "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\user\\Desktop\\copads\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
-        "C:\\Users\\Quang\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [

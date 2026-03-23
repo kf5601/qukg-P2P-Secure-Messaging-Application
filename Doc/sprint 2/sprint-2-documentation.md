@@ -12,9 +12,10 @@
     - Maintains threat model and security assumptions
     - Does demo implementation and test scenarios w/ Grant
     - **Primary Files:**
-        - `Security/CryptoManager.cs`
+        - `Security/AesEncryption.cs`
+        - `Security/RsaEncryption.cs`
         - `Security/KeyExchange.cs`
-        - `Security/SignatureService.cs`
+        - `Security/MessageSigner.cs`
 
 - ### Kai Fan | Architecture Support & Event Integration 
     - Updates event flow to support encrypted message lifecycle
@@ -22,8 +23,9 @@
     - Maintains clean architecture boundaries between modules
 
     - **Primary Files:**
-        - `Program.cs`
-        - Event wiring across modules
+        - `Program.cs` (command handling + wiring for encrypted send/receive)
+        - `Core/Message.cs` (message schema for encrypted payloads/signatures)
+        - Integration touchpoints in `Network/Client.cs` and `Network/Server.cs`
 
 - ### Quang Huynh | Documentation & Integration Engineer 
     - Documents Sprint 2 architecture, security protocol, and threat model
@@ -32,7 +34,7 @@
     - Verifies system stability and edge-case handling
 
     - **Primary Files:**
-        - `Docs/sprint-2-documentation.md`
+        - `Doc/sprint 2/sprint-2-documentation.md`
         - Minor updates in:
             - `Network/Server.cs`
             - `Network/Client.cs`
@@ -44,9 +46,9 @@
     - Does demo implementation and test scenarios w/ Uday
 
     - **Primary Files:**
-        - `Core/ChatRoomManager.cs`
-        - `UI/ConsoleUI.cs` (extended)
-        - `Core/CommandHandler.cs`
+        - `UI/ConsoleUI.cs`
+        - `Program.cs` (room command dispatch)
+        - `Network/Server.cs` (room membership + targeted broadcast)
 
 ---
 
