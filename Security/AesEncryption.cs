@@ -1,4 +1,4 @@
-// [Your Name Here]
+// Uday Bista
 // CSCI 251 - Secure Distributed Messenger
 //
 // SPRINT 2: Security & Encryption
@@ -48,7 +48,10 @@ public class AesEncryption
     /// </summary>
     public static byte[] GenerateKey()
     {
-        throw new NotImplementedException("Implement GenerateKey() - see TODO in comments above");
+        using var aes = Aes.Create();
+        aes.KeySize = 256;
+        aes.GenerateKey();
+        return aes.Key;
     }
 
     /// <summary>
@@ -71,7 +74,20 @@ public class AesEncryption
     /// </summary>
     public byte[] Encrypt(string plaintext)
     {
-        throw new NotImplementedException("Implement Encrypt() - see TODO in comments above");
+        using var aes = Aes.Create();
+        aes.Key = _key;
+        aes.Mode = CipherMode.CBC;
+        aes.GenerateIV();
+
+        var encryptor = aes.CreateEncryptor();
+        var plaintextBytes = Encoding.UTF8.GetBytes(plaintext);
+        var ciphertext = encryptor.TransformFinalBlock(plaintext, 0, plaintext.Length);
+        
+        var result = new byte[aes.IV.Length + ciphertext.Length];
+        Buffer.BlockCopy(aes.IV, 0, result, 0, aes.IV.Length);
+        Buffer.BlockCopy(ciphertext, 0, result, aes.IV.Length, ciphertext.Length);
+        
+        return result;
     }
 
     /// <summary>
@@ -95,6 +111,20 @@ public class AesEncryption
     /// </summary>
     public string Decrypt(byte[] ciphertext)
     {
-        throw new NotImplementedException("Implement Decrypt() - see TODO in comments above");
+        using var aes = Aes.Create();
+        aes.Key = _key;
+        aes.Mode = CipherMode.CBC;
+
+        var iv = new byte[16];
+        Buffer.BlockCopy(ciphertext, 0, iv, 0, 16);
+        aes.IV = iv;
+
+        var actualCiphertext = new byte[ciphertext.Length - 16];
+        Buffer.BlockCopy(ciphertext, 16, actualCiphertext, 0, actualCiphertext.Length);
+
+        var decryptor = aes.CreateDecryptor();
+        var decryptedBytes = decryptor.TransformFinalBlock(actualCiphertext, 0, actualCiphertext.Length);
+        
+        return Encoding.UTF8.GetString(decryptedBytes);
     }
 }
