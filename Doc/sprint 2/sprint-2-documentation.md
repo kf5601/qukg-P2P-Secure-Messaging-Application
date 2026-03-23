@@ -12,9 +12,10 @@
     - Maintains threat model and security assumptions
     - Does demo implementation and test scenarios w/ Grant
     - **Primary Files:**
-        - `Security/CryptoManager.cs`
+        - `Security/AesEncryption.cs`
+        - `Security/RsaEncryption.cs`
         - `Security/KeyExchange.cs`
-        - `Security/SignatureService.cs`
+        - `Security/MessageSigner.cs`
 
 - ### Kai Fan | Architecture Support & Event Integration 
     - Updates event flow to support encrypted message lifecycle
