@@ -6,6 +6,7 @@
 //
 
 using System.Security.Cryptography;
+using System.Text;
 
 namespace SecureMessenger.Security;
 
@@ -81,7 +82,7 @@ public class AesEncryption
 
         var encryptor = aes.CreateEncryptor();
         var plaintextBytes = Encoding.UTF8.GetBytes(plaintext);
-        var ciphertext = encryptor.TransformFinalBlock(plaintext, 0, plaintext.Length);
+        var ciphertext = encryptor.TransformFinalBlock(plaintextBytes, 0, plaintextBytes.Length);
         
         var result = new byte[aes.IV.Length + ciphertext.Length];
         Buffer.BlockCopy(aes.IV, 0, result, 0, aes.IV.Length);

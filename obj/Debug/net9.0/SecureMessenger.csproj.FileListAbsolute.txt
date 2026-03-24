@@ -28,3 +28,18 @@ C:\Users\Kai\School Stuff\2026 Spring\CoPaDS\qukg-P2P-Secure-Messaging-Applicati
 C:\Users\Kai\School Stuff\2026 Spring\CoPaDS\qukg-P2P-Secure-Messaging-Application\obj\Debug\net9.0\SecureMessenger.pdb
 C:\Users\Kai\School Stuff\2026 Spring\CoPaDS\qukg-P2P-Secure-Messaging-Application\obj\Debug\net9.0\SecureMessenger.genruntimeconfig.cache
 C:\Users\Kai\School Stuff\2026 Spring\CoPaDS\qukg-P2P-Secure-Messaging-Application\obj\Debug\net9.0\ref\SecureMessenger.dll
+C:\Users\Quang\Desktop\copads group\obj\Debug\net9.0\SecureMessenger.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Quang\Desktop\copads group\obj\Debug\net9.0\SecureMessenger.AssemblyInfoInputs.cache
+C:\Users\Quang\Desktop\copads group\obj\Debug\net9.0\SecureMessenger.AssemblyInfo.cs
+C:\Users\Quang\Desktop\copads group\obj\Debug\net9.0\SecureMessenger.csproj.CoreCompileInputs.cache
+C:\Users\Quang\Desktop\copads group\obj\Debug\net9.0\SecureMessenger.sourcelink.json
+C:\Users\Quang\Desktop\copads group\obj\Debug\net9.0\SecureMessenger.dll
+C:\Users\Quang\Desktop\copads group\obj\Debug\net9.0\refint\SecureMessenger.dll
+C:\Users\Quang\Desktop\copads group\obj\Debug\net9.0\SecureMessenger.pdb
+C:\Users\Quang\Desktop\copads group\bin\Debug\net9.0\SecureMessenger.exe
+C:\Users\Quang\Desktop\copads group\bin\Debug\net9.0\SecureMessenger.deps.json
+C:\Users\Quang\Desktop\copads group\bin\Debug\net9.0\SecureMessenger.runtimeconfig.json
+C:\Users\Quang\Desktop\copads group\bin\Debug\net9.0\SecureMessenger.dll
+C:\Users\Quang\Desktop\copads group\bin\Debug\net9.0\SecureMessenger.pdb
+C:\Users\Quang\Desktop\copads group\obj\Debug\net9.0\SecureMessenger.genruntimeconfig.cache
+C:\Users\Quang\Desktop\copads group\obj\Debug\net9.0\ref\SecureMessenger.dll

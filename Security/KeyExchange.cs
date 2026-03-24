@@ -66,6 +66,9 @@ public class KeyExchange
     public byte[] GetPublicKey()
     {
         State = ConnectionState.SendingPublicKey;
+        if (_rsa == null)
+            throw new InvalidOperationException("RSA key exchange is not initialized.");
+
         return _rsa.ExportPublicKey();
     }
 
@@ -94,6 +97,11 @@ public class KeyExchange
     /// </summary>
     public byte[] CreateEncryptedSessionKey()
     {
+        if (_rsa == null)
+            throw new InvalidOperationException("RSA key exchange is not initialized.");
+        if (_peerPublicKey == null)
+            throw new InvalidOperationException("Peer public key must be received before creating a session key.");
+
         _sessionKey = AesEncryption.GenerateKey();
         State = ConnectionState.SendingSessionKey;
         return _rsa.EncryptSessionKey(_sessionKey, _peerPublicKey);
@@ -109,6 +117,9 @@ public class KeyExchange
     /// </summary>
     public void ReceiveEncryptedSessionKey(byte[] encryptedKey)
     {
+        if (_rsa == null)
+            throw new InvalidOperationException("RSA key exchange is not initialized.");
+
         _sessionKey = _rsa.DecryptSessionKey(encryptedKey);
         State = ConnectionState.Established;
     }
