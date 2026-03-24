@@ -34,7 +34,7 @@ dotnet run --project SecureMessenger.csproj
 ## Usage
 
 ### Available Commands
-- `/connect <ip> <port>` - Connect to a peer at the specified address
+- `/connect <ip> <port> <name>` - Connect to a peer at the specified address
 - `/listen <port>` - Start listening for incoming connections
 - `/peers` - List all known peers
 - `/history` - View message history
