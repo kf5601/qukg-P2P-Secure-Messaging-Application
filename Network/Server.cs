@@ -487,7 +487,7 @@ public class Server
             return null;
 
         int length = BitConverter.ToInt32(lengthBuffer, 0);
-        if (length <= 0 || length > 1_000_000)
+        if (length <= 0 || length > 1000000)
             throw new InvalidOperationException($"Invalid packet length during handshake: {length}");
 
         byte[] payloadBuffer = new byte[length];
