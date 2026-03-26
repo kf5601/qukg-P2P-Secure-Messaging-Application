@@ -55,8 +55,8 @@ namespace SecureMessenger;
 /// </summary>
 class Program
 {
-    // TODO: Declare your components as fields for access across methods
-    //Sprint 1-2 components:
+    // Declare your components as fields for access across methods
+    // Sprint 1-2 components:
     private static Server? _server;
     private static Client? _client;
     private static ConsoleUI? _ui;
@@ -89,8 +89,8 @@ class Program
         _server.OnMessageReceived += msg => _ui.DisplayMessage(msg);
 
         // Client events:
-        _client.OnConnected += EndPoint => _ui.DisplaySystem($"Connected to server {EndPoint}");
-        _client.OnDisconnected += EndPoint => _ui.DisplaySystem($"Disconnected from server {EndPoint}");
+        _client.OnConnected += endPoint => _ui.DisplaySystem($"Connected to server {endPoint}");
+        _client.OnDisconnected += endPoint => _ui.DisplaySystem($"Disconnected from server {endPoint}");
         _client.OnMessageReceived += msg => _ui.DisplayMessage(msg);
 
         Console.WriteLine("Type /help for available commands");
@@ -112,19 +112,23 @@ class Program
             //    - Quit: Set running = false
             //    - Not a command: Send as a message
 
-            var input = Console.ReadLine();
-            if (string.IsNullOrWhiteSpace(input)) continue;
+            string? input = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                continue;
+            }
 
-            // this is the resuult from ui.ParseCommand, which might only return regular message
+            // this is the result from ui.ParseCommand, which might only return regular message
             var result = _ui.ParseCommand(input);
             if (!result.IsCommand)
             {
-                if(string.IsNullOrWhiteSpace(result.Message))
+                if (string.IsNullOrWhiteSpace(result.Message))
                 {
                     _ui.DisplaySystem("Error: Cannot send empty message");
                     continue;
                 }
-                await SendMessageAsync(result.Message);
+
+                SendMessage(result.Message);
                 continue;
             }
 
@@ -134,28 +138,35 @@ class Program
                 case CommandType.Help:
                     _ui.ShowHelp();
                     break;
+
                 case CommandType.Quit:
                     running = false;
                     break;
+
                 case CommandType.Listen:
-                    if(result.Args is null)
+                    if (result.Args is null)
                     {
-                        _ui!.DisplaySystem("ERROR: Missing Args."); // ! is for null forgiveness, no squiggly yellow line
+                        _ui!.DisplaySystem("Error: Missing args."); // ! is for null forgiveness, no squiggly yellow line
                         break;
                     }
+
                     HandleListen(result.Args);
                     break;
+
                 case CommandType.Connect:
-                    if(result.Args is null)
+                    if (result.Args is null)
                     {
-                        _ui!.DisplaySystem("ERROR: Missing Args."); // ! is for null forgiveness, no squiggly yellow line
+                        _ui!.DisplaySystem("Error: Missing args."); // ! is for null forgiveness, no squiggly yellow line
                         break;
                     }
+
                     await HandleConnectAsync(result.Args);
                     break;
+
                 case CommandType.Peers:
                     HandlePeers();
                     break;
+
                 //this case is for sprint 3
                 //case CommandType.History:
                 //    HandleHistory();
@@ -170,7 +181,7 @@ class Program
         // 2. Disconnect the client
         // 3. (Sprint 3) Stop peer discovery and heartbeat monitor
         _server?.Stop(); // ? is for null conditional operator, only call Stop if _server is not null
-        if(_client is not null) // check if client is connected before trying to disconnect
+        if (_client is not null) // check if client is connected before trying to disconnect
         {
             _client.Disconnect();
         }
@@ -199,59 +210,59 @@ class Program
     // }
 
     // TODO: Add helper methods as needed
-    // Examples:
     private static void HandleListen(string[] args)
     {
-        if(args.Length != 1)
+        if (args.Length != 1)
         {
             _ui!.DisplaySystem("Error: /listen requires 1 argument (port)"); // ! is for null forgiveness, no squiggly yellow line
             return;
         }
+
         // validate port number
-        if(!int.TryParse(args[0], out int p))
+        if (!int.TryParse(args[0], out int port))
         {
             _ui!.DisplaySystem("Error: Invalid port number, it must be a number!"); // ! is for null forgiveness, no squiggly yellow line
             return;
         }
-        
-        int port = int.Parse(args[0]);
 
         _server!.Start(port); // ! is for null forgiveness, no squiggly yellow line
-        _ui!.DisplaySystem($"Started listening on port {port}"); // ! is for null forgiveness, no squiggly yellow line  
+        _ui!.DisplaySystem($"Started listening on port {port}"); // ! is for null forgiveness, no squiggly yellow line
     }
 
     private static async Task HandleConnectAsync(string[] args)
     {
-        if(args.Length != 3)
+        if (args.Length != 3)
         {
-            _ui!.DisplaySystem("Error: /connect requires 3 arguments (host, port, and name)"); 
+            _ui!.DisplaySystem("Error: /connect requires 3 arguments (host, port, and name)");
             return;
         }
 
         string host = args[0];
-        if(!int.TryParse(args[1], out int port))
+        if (!int.TryParse(args[1], out int port))
         {
-            _ui!.DisplaySystem("Error: Invalid port number!"); 
+            _ui!.DisplaySystem("Error: Invalid port number!");
             return;
         }
 
         string myName = args[2];
         _username = myName;
 
-        bool status = await _client!.ConnectAsync(host, port, myName); 
-        if(!status)
+        bool status = await _client!.ConnectAsync(host, port, myName);
+        if (!status)
         {
-            _ui!.DisplaySystem($"Error: Failure to connect to {host}:{port}"); 
+            _ui!.DisplaySystem($"Error: Failed to connect to {host}:{port}");
         }
     }
+
     private static void HandlePeers()
     {
-        _ui!.DisplaySystem($"Server listenting = {_server!.IsListening}, port = {_server!.Port}, client = {_server!.ClientCount}"); // ! is for null forgiveness, no squiggly yellow line
+        _ui!.DisplaySystem($"Server listening = {_server!.IsListening}, port = {_server.Port}, clients = {_server.ClientCount}"); // ! is for null forgiveness, no squiggly yellow line
         _ui.DisplaySystem($"Client connected = {_client!.IsConnected}"); // ! is for null forgiveness, no squiggly yellow line
     }
-    private static async Task SendMessageAsync(string content)
+
+    private static void SendMessage(string content)
     {
-        if (content.Length == 0)
+        if (string.IsNullOrWhiteSpace(content))
         {
             _ui!.DisplaySystem("Error: Cannot send empty message"); // ! is for null forgiveness, no squiggly yellow line
             return;
@@ -262,11 +273,12 @@ class Program
             Content = content,
             Timestamp = DateTime.Now
         };
-        if(_client!.IsConnected) // ! is for null forgiveness, no squiggly yellow line
+
+        if (_client!.IsConnected) // ! is for null forgiveness, no squiggly yellow line
         {
             _client.Send(msg);
         }
-        else if(_server!.IsListening) // ! is for null forgiveness, no squiggly yellow line
+        else if (_server!.IsListening) // ! is for null forgiveness, no squiggly yellow line
         {
             _server.Broadcast(msg);
         }
@@ -274,6 +286,5 @@ class Program
         {
             _ui!.DisplaySystem("Error: Not connected to any peer. Use /connect or /listen first."); // ! is for null forgiveness, no squiggly yellow line
         }
-        return;
     }
 }
