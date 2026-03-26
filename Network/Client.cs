@@ -1,5 +1,4 @@
 // Quang Huynh (qth9368)
-// Kai Fan (kf5601)
 // CSCI 251 - Secure Distributed Messenger
 //
 // SPRINT 1: Threading & Basic Networking
