@@ -280,6 +280,8 @@ class Program
         }
         else if (_server!.IsListening) // ! is for null forgiveness, no squiggly yellow line
         {
+            // force server broadcast to take on the name "Server"
+            msg.Sender = "Server";
             _server.Broadcast(msg);
         }
         else
