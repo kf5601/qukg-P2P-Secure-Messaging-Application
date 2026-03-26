@@ -1,4 +1,5 @@
 // Quang Huynh (qth9368)
+// Kai Fan (kf5601)
 // CSCI 251 - Secure Distributed Messenger
 //
 // SPRINT 1: Threading & Basic Networking
@@ -20,10 +21,13 @@
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using System.Text.Json;
 using SecureMessenger.Core;
 using System.IO;
 using System.Threading;
+// SPRINT 2: Hook up to ../Security
+using SecureMessenger.Security;
 
 namespace SecureMessenger.Network;
 
@@ -40,6 +44,10 @@ namespace SecureMessenger.Network;
 /// </summary>
 public class Server
 {
+    // Sprint 2: per-client security
+    private readonly Dictionary<TcpClient, KeyExchange> _keyExchanges = new();
+    private readonly Dictionary<TcpClient, AesEncryption> _aesSessions = new();
+
     private TcpListener? _listener;
     private readonly List<TcpClient> _clients = new();
     private readonly object _clientsLock = new();
@@ -70,7 +78,7 @@ public class Server
     {
         try
         {
-            if(IsListening)  // if already listening, stop so no leak tasks/sockets
+            if (IsListening)  // if already listening, stop so no leak tasks/sockets
             {
                 Stop();
             }
@@ -83,7 +91,8 @@ public class Server
 
             _ = Task.Run(AcceptClientsAsync); // start accept loop in background
             Console.WriteLine($"Server listening on port {port}");
-        } catch(Exception ex)
+        }
+        catch (Exception ex)
         {
             Console.WriteLine($"Error starting server on port {port}: {ex.Message}");
             Stop();
@@ -108,18 +117,18 @@ public class Server
         var cancel_token = _cancellationTokenSource?.Token ?? CancellationToken.None;
         try
         {
-            if(_listener == null)
+            if (_listener == null)
             {
                 return;
             }
-            while(!cancel_token.IsCancellationRequested)
+            while (!cancel_token.IsCancellationRequested)
             {
                 TcpClient client;
                 try
                 {
                     client = await _listener.AcceptTcpClientAsync();
                 }
-                catch(ObjectDisposedException)
+                catch (ObjectDisposedException)
                 {
                     break; // normal shutdown
                 }
@@ -127,18 +136,21 @@ public class Server
                 {
                     break; // listener stopped / interrupted
                 }
+
                 var endpoint = client.Client.RemoteEndPoint?.ToString() ?? "unknown";
-                lock(_clientsLock)
+                lock (_clientsLock)
                 {
                     _clients.Add(client);
                 }
                 OnClientConnected?.Invoke(endpoint);
                 _ = Task.Run(() => ReceiveFromClientAsync(client, endpoint), cancel_token); // start pr-client receive loop
             }
-        } catch(OperationCanceledException)
+        }
+        catch (OperationCanceledException)
         {
             // normal shutdown
-        } catch(Exception ex)
+        }
+        catch (Exception ex)
         {
             Console.WriteLine($"Error in AcceptClientsAsync: {ex.Message}");
         }
@@ -173,17 +185,52 @@ public class Server
         try
         {
             using NetworkStream stream = client.GetStream();
+
+            // Sprint 2: perform RSA public key exchange + AES session key setup
+            // before entering the normal message receive loop.
+            var keyExchange = new KeyExchange();
+            _keyExchanges[client] = keyExchange;
+
+            // 1. Receive client public key
+            var clientPublicKeyMessage = await ReceivePacketAsync(stream, cancel_token);
+            if (clientPublicKeyMessage?.Type != MessageType.KeyExchange || clientPublicKeyMessage.PublicKey == null)
+                throw new InvalidOperationException($"Invalid client public key message from {endpoint}");
+
+            keyExchange.ReceivePublicKey(clientPublicKeyMessage.PublicKey);
+
+            // 2. Send server public key
+            var serverPublicKeyMessage = new Message
+            {
+                Type = MessageType.KeyExchange,
+                PublicKey = keyExchange.GetPublicKey()
+            };
+            await SendPacketAsync(stream, serverPublicKeyMessage, cancel_token);
+
+            // 3. Receive encrypted AES session key
+            var sessionKeyMessage = await ReceivePacketAsync(stream, cancel_token);
+            if (sessionKeyMessage?.Type != MessageType.SessionKey || sessionKeyMessage.EncryptedContent == null)
+                throw new InvalidOperationException($"Invalid session key message from {endpoint}");
+
+            keyExchange.ReceiveEncryptedSessionKey(sessionKeyMessage.EncryptedContent);
+
+            if (keyExchange.SessionKey == null)
+                throw new InvalidOperationException($"Session key was not established for {endpoint}");
+
+            var aes = new AesEncryption(keyExchange.SessionKey);
+            _aesSessions[client] = aes;
+
             byte[] lengthBuffer = new byte[4];
-            while(!cancel_token.IsCancellationRequested && client.Connected)
+            while (!cancel_token.IsCancellationRequested && client.Connected)
             {
                 // Read 4 bytes for message length
                 bool lengthRead = await ReadExactAsync(stream, lengthBuffer, 4, cancel_token);
-                if(!lengthRead)
+                if (!lengthRead)
                 {
                     break; // client disconnected
                 }
+
                 int messageLength = BitConverter.ToInt32(lengthBuffer, 0);
-                if(messageLength <= 0 || messageLength >= 1_000_000)
+                if (messageLength <= 0 || messageLength >= 1_000_000)
                 {
                     Console.WriteLine($"Invalid message length {messageLength} from {endpoint}");
                     break;
@@ -192,29 +239,38 @@ public class Server
                 // Read the full message payload
                 byte[] payloadBuffer = new byte[messageLength];
                 bool payloadRead = await ReadExactAsync(stream, payloadBuffer, messageLength, cancel_token);
-                if(!payloadRead)
+                if (!payloadRead)
                 {
                     break; // client disconnected
                 }
 
-                string json = System.Text.Encoding.UTF8.GetString(payloadBuffer);
+                string json = Encoding.UTF8.GetString(payloadBuffer);
                 Message? message = null;
                 try
                 {
                     message = JsonSerializer.Deserialize<Message>(json);
-                } catch(Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Console.WriteLine($"Error deserializing message from {endpoint}: {ex.Message}");
                     continue;
                 }
 
-                if(message != null)
+                if (message != null)
                 {
+                    // Sprint 2: decrypt normal text messages after handshake is established.
+                    if (message.Type == MessageType.Text && message.EncryptedContent != null)
+                    {
+                        var clientAes = _aesSessions[client];
+                        message.Content = clientAes.Decrypt(message.EncryptedContent);
+                    }
+
                     OnMessageReceived?.Invoke(message);
-                    Broadcast(message); // echo to all clients (including sender)
+                    Broadcast(message, client); // echo to all clients except sender
                 }
             }
-        } catch (OperationCanceledException)
+        }
+        catch (OperationCanceledException)
         {
             // Normal shutdown
         }
@@ -249,17 +305,23 @@ public class Server
     /// </summary>
     private void DisconnectClient(TcpClient client, string endpoint)
     {
-       bool removed = false;
-       lock(_clientsLock)
-       {
+        bool removed = false;
+        lock (_clientsLock)
+        {
             removed = _clients.Remove(client);
-       }
-       try
+        }
+
+        _aesSessions.Remove(client);
+        _keyExchanges.Remove(client);
+
+        try
         {
             client.Close();
             client.Dispose();
-        } catch { }
-        if(removed)
+        }
+        catch { }
+
+        if (removed)
         {
             OnClientDisconnected?.Invoke(endpoint);
         }
@@ -279,30 +341,56 @@ public class Server
     ///    c. Write the payload
     /// 6. Handle exceptions for individual clients (don't stop broadcast)
     /// </summary>
-    public void Broadcast(Message message)
+    public void Broadcast(Message message, TcpClient? sender = null)
     {
-        string json = JsonSerializer.Serialize(message);
-        byte[] payload = System.Text.Encoding.UTF8.GetBytes(json);
-        byte[] lengthPrefix = BitConverter.GetBytes(payload.Length);    
-
         List<TcpClient> clientsCopy;
-        lock(_clientsLock)
+        lock (_clientsLock)
         {
             clientsCopy = _clients.ToList();
         }
-        foreach(TcpClient client in clientsCopy)
+
+        foreach (TcpClient client in clientsCopy)
         {
+            if (client == sender) continue;
+
             try
             {
                 NetworkStream stream = client.GetStream();
+                Message outbound = message;
+
+                // Sprint 2: encrypt separately for each connected client using that
+                // client's established AES session key.
+                if (message.Type == MessageType.Text && _aesSessions.TryGetValue(client, out var aes))
+                {
+                    byte[] encrypted = aes.Encrypt(message.Content);
+
+                    outbound = new Message
+                    {
+                        Id = message.Id,
+                        Sender = message.Sender,
+                        Content = "",
+                        EncryptedContent = encrypted,
+                        Timestamp = message.Timestamp,
+                        Type = message.Type,
+                        Signature = message.Signature,
+                        PublicKey = message.PublicKey,
+                        TargetPeerId = message.TargetPeerId
+                    };
+                }
+
+                string json = JsonSerializer.Serialize(outbound);
+                byte[] payload = Encoding.UTF8.GetBytes(json);
+                byte[] lengthPrefix = BitConverter.GetBytes(payload.Length);
+
                 stream.Write(lengthPrefix, 0, 4);
                 stream.Write(payload, 0, payload.Length);
                 stream.Flush();
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Console.WriteLine($"Error broadcasting to client: {ex.Message}");
-                var endpoint = client.Client.RemoteEndPoint?.ToString() ?? "unknown";
-                DisconnectClient(client, endpoint);
+                var badEndpoint = client.Client.RemoteEndPoint?.ToString() ?? "unknown";
+                DisconnectClient(client, badEndpoint);
             }
         }
     }
@@ -336,6 +424,9 @@ public class Server
             var ep = client.Client.RemoteEndPoint?.ToString() ?? "unknown";
             try { client.Close(); client.Dispose(); } catch { }
         }
+
+        _aesSessions.Clear();
+        _keyExchanges.Clear();
 
         _listener = null;
         _cancellationTokenSource = null;
@@ -373,5 +464,38 @@ public class Server
             offset += read;
         }
         return true;
+    }
+
+    // Sprint 2: helper used only for protocol packets during the handshake.
+    private static async Task SendPacketAsync(NetworkStream stream, Message message, CancellationToken ct)
+    {
+        string json = JsonSerializer.Serialize(message);
+        byte[] payload = Encoding.UTF8.GetBytes(json);
+        byte[] prefix = BitConverter.GetBytes(payload.Length);
+
+        await stream.WriteAsync(prefix, 0, prefix.Length, ct);
+        await stream.WriteAsync(payload, 0, payload.Length, ct);
+        await stream.FlushAsync(ct);
+    }
+
+    // Sprint 2: helper used only for protocol packets during the handshake.
+    private static async Task<Message?> ReceivePacketAsync(NetworkStream stream, CancellationToken ct)
+    {
+        byte[] lengthBuffer = new byte[4];
+        bool gotLen = await ReadExactAsync(stream, lengthBuffer, 4, ct);
+        if (!gotLen)
+            return null;
+
+        int length = BitConverter.ToInt32(lengthBuffer, 0);
+        if (length <= 0 || length > 1_000_000)
+            throw new InvalidOperationException($"Invalid packet length during handshake: {length}");
+
+        byte[] payloadBuffer = new byte[length];
+        bool gotPayload = await ReadExactAsync(stream, payloadBuffer, length, ct);
+        if (!gotPayload)
+            return null;
+
+        string json = Encoding.UTF8.GetString(payloadBuffer);
+        return JsonSerializer.Deserialize<Message>(json);
     }
 }
