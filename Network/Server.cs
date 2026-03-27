@@ -63,12 +63,6 @@ public class ChatRoom
 /// </summary>
 public class Server
 {
-<<<<<<< HEAD
-    // Sprint 2: per-client security
-    private readonly Dictionary<TcpClient, KeyExchange> _keyExchanges = new();
-    private readonly Dictionary<TcpClient, AesEncryption> _aesSessions = new();
-    private readonly Dictionary<TcpClient, string> _clientNames = new();
-=======
    // Sprint 2: per-client security
    private readonly Dictionary<TcpClient, KeyExchange> _keyExchanges = new();
    private readonly Dictionary<TcpClient, AesEncryption> _aesSessions = new();
@@ -81,22 +75,13 @@ public class Server
    private readonly List<TcpClient> _clients = new();
    private readonly object _clientsLock = new();
    private CancellationTokenSource? _cancellationTokenSource;
->>>>>>> e3ed03f ( added chat rooms, room routing and  UI commands for sprint 2)
 
 
-<<<<<<< HEAD
-    // Events: invoke these with OnXxx?.Invoke(...) when something happens
-    // Program.cs subscribes with: server.OnXxx += (args) => { ... };
-    public event Action<string, string>? OnClientConnected;      // endpoint + display name
-    public event Action<string, string>? OnClientDisconnected;
-    public event Action<Message>? OnMessageReceived;
-=======
    // Events: invoke these with OnXxx?.Invoke(...) when something happens
    // Program.cs subscribes with: server.OnXxx += (args) => { ... };
    public event Action<string>? OnClientConnected;      // endpoint string, e.g. "192.168.1.5:54321"
    public event Action<string>? OnClientDisconnected;
    public event Action<Message>? OnMessageReceived;
->>>>>>> e3ed03f ( added chat rooms, room routing and  UI commands for sprint 2)
 
 
    public int Port { get; private set; }
@@ -129,27 +114,7 @@ public class Server
            _listener.Start();
 
 
-<<<<<<< HEAD
-                var endpoint = client.Client.RemoteEndPoint?.ToString() ?? "unknown";
-                lock (_clientsLock)
-                {
-                    _clients.Add(client);
-                }
-                _ = Task.Run(() => ReceiveFromClientAsync(client, endpoint), cancel_token); // start pr-client receive loop
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            // normal shutdown
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error in AcceptClientsAsync: {ex.Message}");
-        }
-    }
-=======
            IsListening = true;
->>>>>>> e3ed03f ( added chat rooms, room routing and  UI commands for sprint 2)
 
 
            _ = Task.Run(AcceptClientsAsync); // start accept loop in background
@@ -266,48 +231,9 @@ public class Server
                throw new InvalidOperationException($"Invalid client public key message from {endpoint}");
 
 
-<<<<<<< HEAD
-                if (message != null)
-                {
-                    RegisterClientName(client, endpoint, message);
-
-                    // Sprint 2: decrypt normal text messages after handshake is established.
-                    if (message.Type == MessageType.Text && message.EncryptedContent != null)
-                    {
-                        var clientAes = _aesSessions[client];
-                        message.Content = clientAes.Decrypt(message.EncryptedContent);
-                    }
-=======
            keyExchange.ReceivePublicKey(clientPublicKeyMessage.PublicKey);
->>>>>>> e3ed03f ( added chat rooms, room routing and  UI commands for sprint 2)
 
 
-<<<<<<< HEAD
-    /// <summary>
-    /// Clean up a disconnected client.
-    ///
-    /// TODO: Implement the following:
-    /// 1. Remove the client from _clients (with proper locking)
-    /// 2. Close the client connection
-    /// 3. Invoke OnClientDisconnected event
-    ///
-    /// Sprint 3: This will be refactored to DisconnectPeer(Peer peer)
-    /// to handle richer peer state and trigger reconnection attempts.
-    /// </summary>
-    private void DisconnectClient(TcpClient client, string endpoint)
-    {
-        bool removed = false;
-        string clientName = endpoint;
-        lock (_clientsLock)
-        {
-            removed = _clients.Remove(client);
-            if (_clientNames.TryGetValue(client, out var storedName) && !string.IsNullOrWhiteSpace(storedName))
-            {
-                clientName = storedName;
-            }
-            _clientNames.Remove(client);
-        }
-=======
            // 2. Send server public key
            var serverPublicKeyMessage = new Message
            {
@@ -315,7 +241,6 @@ public class Server
                PublicKey = keyExchange.GetPublicKey()
            };
            await SendPacketAsync(stream, serverPublicKeyMessage, cancel_token);
->>>>>>> e3ed03f ( added chat rooms, room routing and  UI commands for sprint 2)
 
 
            // 3. Receive encrypted AES session key
@@ -323,14 +248,6 @@ public class Server
            if (sessionKeyMessage?.Type != MessageType.SessionKey || sessionKeyMessage.EncryptedContent == null)
                throw new InvalidOperationException($"Invalid session key message from {endpoint}");
 
-<<<<<<< HEAD
-        if (removed)
-        {
-            OnClientDisconnected?.Invoke(endpoint, clientName);
-        }
-    }
-=======
->>>>>>> e3ed03f ( added chat rooms, room routing and  UI commands for sprint 2)
 
            keyExchange.ReceiveEncryptedSessionKey(sessionKeyMessage.EncryptedContent);
 
@@ -361,16 +278,6 @@ public class Server
                    break;
                }
 
-<<<<<<< HEAD
-        List<TcpClient> snapshot;
-        lock (_clientsLock)
-        {
-            snapshot = _clients.ToList();
-            _clients.Clear();
-            _clientNames.Clear();
-        }
-=======
->>>>>>> e3ed03f ( added chat rooms, room routing and  UI commands for sprint 2)
 
                // Read the full message payload
                byte[] payloadBuffer = new byte[messageLength];
@@ -475,35 +382,6 @@ public class Server
        _aesSessions.Remove(client);
        _keyExchanges.Remove(client);
 
-<<<<<<< HEAD
-        string json = Encoding.UTF8.GetString(payloadBuffer);
-        return JsonSerializer.Deserialize<Message>(json);
-    }
-
-    private void RegisterClientName(TcpClient client, string endpoint, Message message)
-    {
-        if (string.IsNullOrWhiteSpace(message.Sender))
-        {
-            return;
-        }
-
-        bool shouldFireConnected = false;
-        lock (_clientsLock)
-        {
-            if (!_clientNames.ContainsKey(client))
-            {
-                _clientNames[client] = message.Sender;
-                shouldFireConnected = true;
-            }
-        }
-
-        if (shouldFireConnected)
-        {
-            OnClientConnected?.Invoke(endpoint, message.Sender);
-        }
-    }
-}
-=======
 
        _endpointMap.Remove(endpoint);
 
@@ -886,4 +764,3 @@ public class Server
        return JsonSerializer.Deserialize<Message>(json);
    }
 }
->>>>>>> e3ed03f ( added chat rooms, room routing and  UI commands for sprint 2)

@@ -66,6 +66,8 @@ class Program
     private static readonly Dictionary<string, byte[]> _peerPublicKeys
         = new(StringComparer.OrdinalIgnoreCase);
 
+    private static readonly Dictionary<string, string> _endpointToUsername
+        = new(StringComparer.OrdinalIgnoreCase);
 
     private static readonly HashSet<string> _trustedPeers
         = new(StringComparer.OrdinalIgnoreCase);
@@ -92,23 +94,23 @@ class Program
 
         // TODO: Subscribe to events
         // Server events:
-<<<<<<< HEAD
-        _server.OnClientConnected += (peer, userName) => _ui.DisplaySystem($"Client {peer} ({userName}) connected");
-        _server.OnClientDisconnected += (peer, userName) => _ui.DisplaySystem($"Client {peer} ({userName}) disconnected");
-        _server.OnMessageReceived += msg => _ui.DisplayMessage(msg);
-=======
-        _server.OnClientConnected += peer => _ui.DisplaySystem($"Client {peer} connected");
-        _server.OnClientDisconnected += peer =>
+        
+        _server.OnClientConnected += (peer) => 
+        {
+            // Store endpoint, username will be set when join message arrives
+            _endpointToUsername[peer] = "unknown";
+        };
+        _server.OnClientDisconnected += (peer) =>
         {
             _ui.DisplaySystem($"Client {peer} disconnected");
             _peerPublicKeys.Remove(peer);
             _trustedPeers.Remove(peer);
+            _endpointToUsername.Remove(peer);
         };
 
         _server.OnMessageReceived += msg => HandleIncomingMessage(msg);
         _server.OnClientJoinedRoom += (ep, room) => _ui.DisplayRoomEvent(room, $"{ep} joined the room");
         _server.OnClientLeftRoom += (ep, room) => _ui.DisplayRoomEvent(room, $"{ep} left the room");
->>>>>>> e3ed03f ( added chat rooms, room routing and  UI commands for sprint 2)
 
         // Client events:
         _client.OnConnected += endPoint =>
@@ -353,9 +355,6 @@ class Program
             _ui!.DisplaySystem("Error: Not connected to any peer. Use /connect or /listen first."); // ! is for null forgiveness, no squiggly yellow line
         }
     }
-<<<<<<< HEAD
-}
-=======
     // central handler
     private static void HandleIncomingMessage(Message message)
     {
@@ -378,6 +377,17 @@ class Program
 
             case MessageType.Text:
             default:
+                // If this is a join message, update endpoint-to-username mapping and display with both
+                if (message.Content.EndsWith("has joined the conversation"))
+                {
+                    // Find which endpoint this username belongs to (first unresolved one)
+                    var unresolvedEndpoint = _endpointToUsername.FirstOrDefault(kvp => kvp.Value == "unknown").Key;
+                    if (unresolvedEndpoint != null)
+                    {
+                        _endpointToUsername[unresolvedEndpoint] = message.Sender;
+                        _ui!.DisplaySystem($"Client {unresolvedEndpoint} ({message.Sender}) connected");
+                    }
+                }
                 _ui!.DisplayMessage(message);
                 break;
         }
@@ -514,4 +524,3 @@ class Program
             Type = MessageType.Text
         };
 }
->>>>>>> e3ed03f ( added chat rooms, room routing and  UI commands for sprint 2)

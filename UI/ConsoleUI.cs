@@ -38,18 +38,13 @@ public class ConsoleUI
     public void DisplayMessage(Message message)
     {
         string formattedTimestamp = message.Timestamp.ToString("HH:mm:ss");
-<<<<<<< HEAD
-        if (message.Content == "has joined the conversation")
+        if (message.Content.EndsWith("has joined the conversation"))
         {
             Console.WriteLine($"[{formattedTimestamp}] {message.Sender} {message.Content}");
             return;
         }
 
         Console.WriteLine($"[{formattedTimestamp}] {message.Sender}: {message.Content}");
-=======
-        string badge = BuildBadge(message);
-        Console.WriteLine($"[{formattedTimestamp}] {message.Sender}{badge}: {message.Content}");
->>>>>>> e3ed03f ( added chat rooms, room routing and  UI commands for sprint 2)
     }
 
     /// <summary>
