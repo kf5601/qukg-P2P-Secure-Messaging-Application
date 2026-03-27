@@ -21,8 +21,10 @@ namespace SecureMessenger.UI;
 /// - /quit or /exit      - Exit the application
 /// - Any other text      - Send as a message
 /// </summary>
+
 public class ConsoleUI
 {
+    private string? _currentRoom = null;
     /// <summary>
     /// Display a received message to the console.
     ///
@@ -31,9 +33,12 @@ public class ConsoleUI
     /// 2. Use message.Timestamp.ToString("HH:mm:ss") for time format
     /// 3. Print to console
     /// </summary>
+    
+    
     public void DisplayMessage(Message message)
     {
         string formattedTimestamp = message.Timestamp.ToString("HH:mm:ss");
+<<<<<<< HEAD
         if (message.Content == "has joined the conversation")
         {
             Console.WriteLine($"[{formattedTimestamp}] {message.Sender} {message.Content}");
@@ -41,6 +46,10 @@ public class ConsoleUI
         }
 
         Console.WriteLine($"[{formattedTimestamp}] {message.Sender}: {message.Content}");
+=======
+        string badge = BuildBadge(message);
+        Console.WriteLine($"[{formattedTimestamp}] {message.Sender}{badge}: {message.Content}");
+>>>>>>> e3ed03f ( added chat rooms, room routing and  UI commands for sprint 2)
     }
 
     /// <summary>
@@ -51,6 +60,25 @@ public class ConsoleUI
     public void DisplaySystem(string message)
     {
         Console.WriteLine($"[System] {message}");
+    }
+
+    // Event display
+    public void DisplayRoomEvent(string roomName, string message)
+    {
+        Console.WriteLine($"[Room:{roomName}] {message}");
+    }
+
+    // Makes room name 
+    public void SetCurrentRoom(string? roomName)
+    {
+        _currentRoom = roomName;
+    }
+
+    // Shows room name in prompt
+    public void PrintPrompt()
+    {
+        string prefix = _currentRoom is not null ? $"[{_currentRoom}] " : "";
+        Console.Write($"{prefix}> ");
     }
 
     /// <summary>
@@ -67,6 +95,12 @@ public class ConsoleUI
         Console.WriteLine("  /listen <port>        - Start listening for connections");
         Console.WriteLine("  /peers                - Show connection status");
         Console.WriteLine("  /history              - View message history (Sprint 3)");
+        Console.WriteLine("  /room create <n>      - Create a chat room");
+        Console.WriteLine("  /room join <n>        - Join a chat room");
+        Console.WriteLine("  /room leave           - Leave current room");
+        Console.WriteLine("  /room list            - List rooms and members");
+        Console.WriteLine("  /trust <n>            - Trust a peer's key");
+        Console.WriteLine("  /keyinfo              - Show your key fingerprint");
         Console.WriteLine("  /quit or /exit        - Exit the application");
     }
 
@@ -96,16 +130,20 @@ public class ConsoleUI
     public CommandResult ParseCommand(string input)
     {
         // if empty input, return not a command with error message
-        if(input.Length == 0)
+        if (input.Length == 0)
         {
-            return new CommandResult { IsCommand = false, Message = "Error: Empty input"};
+            return new CommandResult { IsCommand = false, Message = "Error: Empty input" };
         }
         // if input doesn't start with '/', it's a regular message
-        if(input[0] != '/')
+        if (input[0] != '/')
         {
             return new CommandResult { IsCommand = false, Message = input };
         }
         string[] parts = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        // send to parser
+        if (parts[0].ToLower() == "/room")
+            return ParseRoomCommand(parts);
 
         // switch case for different commands
         CommandType commandType = parts[0].ToLower() switch
@@ -114,6 +152,8 @@ public class ConsoleUI
             "/listen" => CommandType.Listen,
             "/peers" => CommandType.Peers,
             "/history" => CommandType.History,
+            "/trust" => CommandType.Trust,
+            "/keyinfo" => CommandType.KeyInfo,
             "/help" => CommandType.Help,
             "/quit" or "/exit" => CommandType.Quit,
             _ => CommandType.Unknown
@@ -124,18 +164,64 @@ public class ConsoleUI
         {
             return new CommandResult { IsCommand = true, CommandType = CommandType.Unknown, Message = "Error: /connect requires 3 arguments (host, port, and name)" };
         }
-        
+
         if (commandType == CommandType.Listen && parts.Length != 2)
         {
             return new CommandResult { IsCommand = true, CommandType = CommandType.Unknown, Message = "Error: /listen requires 1 argument (port)" };
+        }
+        if (commandType == CommandType.Trust && parts.Length < 2)
+        {
+            return new CommandResult { IsCommand = true, CommandType = CommandType.Unknown, Message = "Error: /trust requires 1 argument (name)" };
         }
 
         return new CommandResult
         {
             IsCommand = true,
             CommandType = commandType,
-            Args = parts.Skip(1).ToArray() 
+            Args = parts.Skip(1).ToArray()
         };
+    }
+    // handles /room create/join/leave/list
+    private CommandResult ParseRoomCommand(string[] parts)
+    {
+        if (parts.Length < 2)
+            return new CommandResult { IsCommand = true, CommandType = CommandType.Unknown, Message = "Error: /room needs a query,  create / join / leave / list" };
+
+        string sub = parts[1].ToLower();
+
+        switch (sub)
+        {
+            case "create":
+                if (parts.Length < 3)
+                    return new CommandResult { IsCommand = true, CommandType = CommandType.Unknown, Message = "Error: /room create needs a room name" };
+                return new CommandResult { IsCommand = true, CommandType = CommandType.RoomCreate, Args = new[] { parts[2] } };
+
+            case "join":
+                if (parts.Length < 3)
+                    return new CommandResult { IsCommand = true, CommandType = CommandType.Unknown, Message = "Error: /room join needs a room name" };
+                return new CommandResult { IsCommand = true, CommandType = CommandType.RoomJoin, Args = new[] { parts[2] } };
+
+            case "leave":
+                return new CommandResult { IsCommand = true, CommandType = CommandType.RoomLeave, Args = Array.Empty<string>() };
+
+            case "list":
+                return new CommandResult { IsCommand = true, CommandType = CommandType.RoomList, Args = Array.Empty<string>() };
+
+            default:
+                return new CommandResult { IsCommand = true, CommandType = CommandType.Unknown, Message = $"Error: Unknown /room command '{sub}', se create / join / leave / list" };
+        }
+    }
+
+    // checks message fields for encryption badges
+    private static string BuildBadge(Message message)
+    {
+        if (message.EncryptedContent is { Length: > 0 } && message.Signature is { Length: > 0 })
+            return " [ENCRYPTED+SIGNED]";
+        if (message.EncryptedContent is { Length: > 0 })
+            return " [ENCRYPTED]";
+        if (message.Signature is { Length: > 0 })
+            return " [SIGNED]";
+        return "";
     }
 }
 
@@ -149,6 +235,12 @@ public enum CommandType
     Connect,
     Listen,
     Peers,
+    RoomCreate,
+    RoomJoin,
+    RoomLeave,
+    RoomList,
+    Trust,
+    KeyInfo,
     History,
     Help,
     Quit
