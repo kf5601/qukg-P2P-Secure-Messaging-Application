@@ -71,6 +71,9 @@ class Program
 
     private static readonly HashSet<string> _trustedPeers
         = new(StringComparer.OrdinalIgnoreCase);
+
+    private static readonly System.Security.Cryptography.RSA _localRsa = System.Security.Cryptography.RSA.Create(2048);
+    private static readonly MessageSigner _signer = new MessageSigner(_localRsa);
     //
     // Sprint 3 additions:
     // private static PeerDiscovery? _peerDiscovery;
@@ -94,8 +97,8 @@ class Program
 
         // TODO: Subscribe to events
         // Server events:
-        
-        _server.OnClientConnected += (peer) => 
+
+        _server.OnClientConnected += (peer) =>
         {
             // Store endpoint, username will be set when join message arrives
             _endpointToUsername[peer] = "unknown";
@@ -334,8 +337,15 @@ class Program
         {
             Sender = _username,
             Content = content,
-            Timestamp = DateTime.Now
+            Timestamp = DateTime.Now,
+            Type = MessageType.Text
         };
+
+        if (_trustedPeers.Count > 0)
+        {
+            byte[] contentBytes = System.Text.Encoding.UTF8.GetBytes(content);
+            msg.Signature = _signer.SignData(contentBytes);
+        }
 
         if (_client!.IsConnected) // ! is for null forgiveness, no squiggly yellow line
         {
@@ -377,10 +387,35 @@ class Program
 
             case MessageType.Text:
             default:
-                // If this is a join message, update endpoint-to-username mapping and display with both
+                if (message.Content.StartsWith("__JOIN_ROOM__"))
+                {
+                    if (_server!.IsListening)
+                    {
+                        string roomName = message.Content.Substring("__JOIN_ROOM__".Length);
+                        var endpoint = _endpointToUsername.FirstOrDefault(kvp => kvp.Value == message.Sender).Key;
+                        if (endpoint != null)
+                        {
+                            _server.JoinRoom(endpoint, roomName);
+                        }
+                    }
+                    return;
+                }
+
+                if (message.Content.StartsWith("__LEAVE_ROOM__"))
+                {
+                    if (_server!.IsListening)
+                    {
+                        string roomName = message.Content.Substring("__LEAVE_ROOM__".Length);
+                        var endpoint = _endpointToUsername.FirstOrDefault(kvp => kvp.Value == message.Sender).Key;
+                        if (endpoint != null)
+                        {
+                            _server.LeaveRoom(endpoint);
+                        }
+                    }
+                    return;
+                }
                 if (message.Content.EndsWith("has joined the conversation"))
                 {
-                    // Find which endpoint this username belongs to (first unresolved one)
                     var unresolvedEndpoint = _endpointToUsername.FirstOrDefault(kvp => kvp.Value == "unknown").Key;
                     if (unresolvedEndpoint != null)
                     {
