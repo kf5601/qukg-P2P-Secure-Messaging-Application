@@ -34,6 +34,12 @@ public class ConsoleUI
     public void DisplayMessage(Message message)
     {
         string formattedTimestamp = message.Timestamp.ToString("HH:mm:ss");
+        if (message.Content == "has joined the conversation")
+        {
+            Console.WriteLine($"[{formattedTimestamp}] {message.Sender} {message.Content}");
+            return;
+        }
+
         Console.WriteLine($"[{formattedTimestamp}] {message.Sender}: {message.Content}");
     }
 

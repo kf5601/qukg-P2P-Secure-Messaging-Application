@@ -84,8 +84,8 @@ class Program
 
         // TODO: Subscribe to events
         // Server events:
-        _server.OnClientConnected += peer => _ui.DisplaySystem($"Client {peer} connected");
-        _server.OnClientDisconnected += peer => _ui.DisplaySystem($"Client {peer} disconnected");
+        _server.OnClientConnected += (peer, userName) => _ui.DisplaySystem($"Client {peer} ({userName}) connected");
+        _server.OnClientDisconnected += (peer, userName) => _ui.DisplaySystem($"Client {peer} ({userName}) disconnected");
         _server.OnMessageReceived += msg => _ui.DisplayMessage(msg);
 
         // Client events:

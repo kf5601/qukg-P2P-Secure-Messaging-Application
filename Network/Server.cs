@@ -46,6 +46,7 @@ public class Server
     // Sprint 2: per-client security
     private readonly Dictionary<TcpClient, KeyExchange> _keyExchanges = new();
     private readonly Dictionary<TcpClient, AesEncryption> _aesSessions = new();
+    private readonly Dictionary<TcpClient, string> _clientNames = new();
 
     private TcpListener? _listener;
     private readonly List<TcpClient> _clients = new();
@@ -54,8 +55,8 @@ public class Server
 
     // Events: invoke these with OnXxx?.Invoke(...) when something happens
     // Program.cs subscribes with: server.OnXxx += (args) => { ... };
-    public event Action<string>? OnClientConnected;      // endpoint string, e.g. "192.168.1.5:54321"
-    public event Action<string>? OnClientDisconnected;
+    public event Action<string, string>? OnClientConnected;      // endpoint + display name
+    public event Action<string, string>? OnClientDisconnected;
     public event Action<Message>? OnMessageReceived;
 
     public int Port { get; private set; }
@@ -141,7 +142,6 @@ public class Server
                 {
                     _clients.Add(client);
                 }
-                OnClientConnected?.Invoke(endpoint);
                 _ = Task.Run(() => ReceiveFromClientAsync(client, endpoint), cancel_token); // start pr-client receive loop
             }
         }
@@ -257,6 +257,8 @@ public class Server
 
                 if (message != null)
                 {
+                    RegisterClientName(client, endpoint, message);
+
                     // Sprint 2: decrypt normal text messages after handshake is established.
                     if (message.Type == MessageType.Text && message.EncryptedContent != null)
                     {
@@ -305,9 +307,15 @@ public class Server
     private void DisconnectClient(TcpClient client, string endpoint)
     {
         bool removed = false;
+        string clientName = endpoint;
         lock (_clientsLock)
         {
             removed = _clients.Remove(client);
+            if (_clientNames.TryGetValue(client, out var storedName) && !string.IsNullOrWhiteSpace(storedName))
+            {
+                clientName = storedName;
+            }
+            _clientNames.Remove(client);
         }
 
         _aesSessions.Remove(client);
@@ -322,7 +330,7 @@ public class Server
 
         if (removed)
         {
-            OnClientDisconnected?.Invoke(endpoint);
+            OnClientDisconnected?.Invoke(endpoint, clientName);
         }
     }
 
@@ -416,6 +424,7 @@ public class Server
         {
             snapshot = _clients.ToList();
             _clients.Clear();
+            _clientNames.Clear();
         }
 
         foreach (var client in snapshot)
@@ -496,5 +505,28 @@ public class Server
 
         string json = Encoding.UTF8.GetString(payloadBuffer);
         return JsonSerializer.Deserialize<Message>(json);
+    }
+
+    private void RegisterClientName(TcpClient client, string endpoint, Message message)
+    {
+        if (string.IsNullOrWhiteSpace(message.Sender))
+        {
+            return;
+        }
+
+        bool shouldFireConnected = false;
+        lock (_clientsLock)
+        {
+            if (!_clientNames.ContainsKey(client))
+            {
+                _clientNames[client] = message.Sender;
+                shouldFireConnected = true;
+            }
+        }
+
+        if (shouldFireConnected)
+        {
+            OnClientConnected?.Invoke(endpoint, message.Sender);
+        }
     }
 }
