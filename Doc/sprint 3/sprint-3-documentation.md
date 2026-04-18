@@ -4,11 +4,56 @@
 **Team Name:** qukg (Group 26)
 
 **Team Members:**
-- [Name 1] - [Role/Responsibilities]
-- [Name 2] - [Role/Responsibilities]
-- [Name 3] - [Role/Responsibilities]
-- [Name 4] - [Role/Responsibilities]
-- [Name 5] - [Role/Responsibilities]
+- ### Uday Bista | Security, Parallel Processing & Message Pipeline
+    - Maintains Sprint 2 security features as the application moves into the P2P model
+    - Ensures AES encryption, RSA key exchange, and message signing continue to work across peer connections
+    - Supports parallel message processing through the thread-safe message queue
+    - Helps validate encrypted direct messages and secure message fan-out behavior
+    - Assists with demo testing for secure P2P communication
+    - **Primary Files:**
+        - `Security/AesEncryption.cs`
+        - `Security/RsaEncryption.cs`
+        - `Security/KeyExchange.cs`
+        - `Security/MessageSigner.cs`
+        - `Core/MessageQueue.cs`
+
+- ### Kai Fan | P2P Application Flow, Message Model & UI Commands
+    - Updates the main application flow for Sprint 3 commands and peer-oriented behavior
+    - Maintains the shared message model used by text, key exchange, heartbeat, and peer discovery messages
+    - Integrates `/peers`, `/history`, direct-message, and room commands into the console workflow
+    - Keeps command parsing and user-facing console output consistent with the required command syntax
+    - Assists with wiring Sprint 3 networking events into the user interface
+    - **Primary Files:**
+        - `Program.cs`
+        - `Core/Message.cs`
+        - `Core/Peer.cs`
+        - `UI/ConsoleUI.cs`
+
+- ### Quang Huynh | P2P Networking, Resilience & Documentation
+    - Refactors networking behavior toward a peer-to-peer architecture where each instance can listen and connect
+    - Maintains TCP connection handling, length-prefix framing, encrypted send/receive flow, and peer status reporting
+    - Integrates peer discovery, heartbeat monitoring, and reconnection support into the networking layer
+    - Documents Sprint 3 architecture, protocol behavior, resilience features, and user guide content
+    - Verifies build stability and documents known limitations for the final submission
+    - **Primary Files:**
+        - `Network/Client.cs`
+        - `Network/Server.cs`
+        - `Network/PeerDiscovery.cs`
+        - `Network/HeartbeatMonitor.cs`
+        - `Network/ReconnectionPolicy.cs`
+        - `Doc/sprint 3/sprint-3-documentation.md`
+
+- ### Grant Keegan | Decentralized Rooms, Message History & Demo
+    - Carries Sprint 2 chat-room behavior into the Sprint 3 P2P workflow (also fix up mistakes in previous implementation of chatroom)
+    - Maintains room creation, join, leave, room listing, and room-scoped message routing
+    - Implements and tests local file-based message history for `/history`
+    - Helps validate direct messages, room messages, and failure-recovery scenarios from the user perspective
+    - Leads final demo preparation with 3+ peers, peer discovery, room messaging, and recovery testing
+    - **Primary Files:**
+        - `UI/ConsoleUI.cs`
+        - `UI/MessageHistory.cs`
+        - `Program.cs`
+        - `Network/Server.cs`
 
 **Date:** 04/24/2026
 
