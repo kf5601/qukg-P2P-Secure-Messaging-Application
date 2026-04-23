@@ -103,7 +103,8 @@ public class PeerDiscovery
         if (_udpClient == null || _cancellationTokenSource == null)
             return;
 
-        var endpoint = new IPEndPoint(IPAddress.Broadcast, _broadcastPort);
+        var broadcastEndpoint = new IPEndPoint(IPAddress.Broadcast, _broadcastPort);
+        var loopbackEndpoint = new IPEndPoint(IPAddress.Loopback, _broadcastPort);
         var token = _cancellationTokenSource.Token;
 
         while (!token.IsCancellationRequested)
@@ -112,7 +113,8 @@ public class PeerDiscovery
             {
                 string message = $"PEER:{LocalPeerId}:{TcpPort}";
                 byte[] data = Encoding.UTF8.GetBytes(message);
-                _udpClient.Send(data, data.Length, endpoint);
+                _udpClient.Send(data, data.Length, broadcastEndpoint);
+                _udpClient.Send(data, data.Length, loopbackEndpoint);
             }
             catch (SocketException)
             {

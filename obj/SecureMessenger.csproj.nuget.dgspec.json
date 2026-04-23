@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\CodexSandboxOffline\\.codex\\.sandbox\\cwd\\9c0a01570b17e1e7\\SecureMessenger.csproj": {}
+    "C:\\Users\\Quang\\Desktop\\copads group\\SecureMessenger.csproj": {}
   },
   "projects": {
-    "C:\\Users\\CodexSandboxOffline\\.codex\\.sandbox\\cwd\\9c0a01570b17e1e7\\SecureMessenger.csproj": {
+    "C:\\Users\\Quang\\Desktop\\copads group\\SecureMessenger.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\CodexSandboxOffline\\.codex\\.sandbox\\cwd\\9c0a01570b17e1e7\\SecureMessenger.csproj",
+        "projectUniqueName": "C:\\Users\\Quang\\Desktop\\copads group\\SecureMessenger.csproj",
         "projectName": "SecureMessenger",
-        "projectPath": "C:\\Users\\CodexSandboxOffline\\.codex\\.sandbox\\cwd\\9c0a01570b17e1e7\\SecureMessenger.csproj",
-        "packagesPath": "C:\\Users\\CodexSandboxOffline\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\CodexSandboxOffline\\.codex\\.sandbox\\cwd\\9c0a01570b17e1e7\\obj\\",
+        "projectPath": "C:\\Users\\Quang\\Desktop\\copads group\\SecureMessenger.csproj",
+        "packagesPath": "C:\\Users\\Quang\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Quang\\Desktop\\copads group\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
