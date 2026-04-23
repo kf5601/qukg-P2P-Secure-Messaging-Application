@@ -43,3 +43,18 @@ C:\Users\Quang\Desktop\copads group\bin\Debug\net9.0\SecureMessenger.dll
 C:\Users\Quang\Desktop\copads group\bin\Debug\net9.0\SecureMessenger.pdb
 C:\Users\Quang\Desktop\copads group\obj\Debug\net9.0\SecureMessenger.genruntimeconfig.cache
 C:\Users\Quang\Desktop\copads group\obj\Debug\net9.0\ref\SecureMessenger.dll
+C:\Users\CodexSandboxOffline\.codex\.sandbox\cwd\9c0a01570b17e1e7\bin\Debug\net9.0\SecureMessenger.exe
+C:\Users\CodexSandboxOffline\.codex\.sandbox\cwd\9c0a01570b17e1e7\bin\Debug\net9.0\SecureMessenger.deps.json
+C:\Users\CodexSandboxOffline\.codex\.sandbox\cwd\9c0a01570b17e1e7\bin\Debug\net9.0\SecureMessenger.runtimeconfig.json
+C:\Users\CodexSandboxOffline\.codex\.sandbox\cwd\9c0a01570b17e1e7\bin\Debug\net9.0\SecureMessenger.dll
+C:\Users\CodexSandboxOffline\.codex\.sandbox\cwd\9c0a01570b17e1e7\bin\Debug\net9.0\SecureMessenger.pdb
+C:\Users\CodexSandboxOffline\.codex\.sandbox\cwd\9c0a01570b17e1e7\obj\Debug\net9.0\SecureMessenger.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\CodexSandboxOffline\.codex\.sandbox\cwd\9c0a01570b17e1e7\obj\Debug\net9.0\SecureMessenger.AssemblyInfoInputs.cache
+C:\Users\CodexSandboxOffline\.codex\.sandbox\cwd\9c0a01570b17e1e7\obj\Debug\net9.0\SecureMessenger.AssemblyInfo.cs
+C:\Users\CodexSandboxOffline\.codex\.sandbox\cwd\9c0a01570b17e1e7\obj\Debug\net9.0\SecureMessenger.csproj.CoreCompileInputs.cache
+C:\Users\CodexSandboxOffline\.codex\.sandbox\cwd\9c0a01570b17e1e7\obj\Debug\net9.0\SecureMessenger.sourcelink.json
+C:\Users\CodexSandboxOffline\.codex\.sandbox\cwd\9c0a01570b17e1e7\obj\Debug\net9.0\SecureMessenger.dll
+C:\Users\CodexSandboxOffline\.codex\.sandbox\cwd\9c0a01570b17e1e7\obj\Debug\net9.0\refint\SecureMessenger.dll
+C:\Users\CodexSandboxOffline\.codex\.sandbox\cwd\9c0a01570b17e1e7\obj\Debug\net9.0\SecureMessenger.pdb
+C:\Users\CodexSandboxOffline\.codex\.sandbox\cwd\9c0a01570b17e1e7\obj\Debug\net9.0\SecureMessenger.genruntimeconfig.cache
+C:\Users\CodexSandboxOffline\.codex\.sandbox\cwd\9c0a01570b17e1e7\obj\Debug\net9.0\ref\SecureMessenger.dll

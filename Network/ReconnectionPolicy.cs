@@ -40,6 +40,7 @@ public class ReconnectionPolicy
 {
     private readonly ConcurrentDictionary<string, int> _attemptCount = new();
     private readonly Client _client;
+    private readonly string _localName;
 
     private const int MaxAttempts = 5;
     private const int InitialDelayMs = 1000;
@@ -49,9 +50,10 @@ public class ReconnectionPolicy
     public event Action<string>? OnReconnectSuccess;
     public event Action<string>? OnReconnectFailed;
 
-    public ReconnectionPolicy(Client client)
+    public ReconnectionPolicy(Client client, string localName)
     {
         _client = client;
+        _localName = localName;
     }
 
     /// <summary>
@@ -81,7 +83,6 @@ public class ReconnectionPolicy
     public async Task<bool> TryReconnect(Peer peer)
     {
         int attempt = GetAttemptCount(peer.Id);
-        string displayName = string.IsNullOrWhiteSpace(peer.Name) ? peer.Id : peer.Name;
 
         while (attempt < MaxAttempts)
         {
@@ -92,7 +93,7 @@ public class ReconnectionPolicy
             int delay = Math.Min(InitialDelayMs * (1 << (attempt - 1)), MaxDelayMs);
             string host = peer.Address?.ToString() ?? "127.0.0.1";
 
-            if (await _client.ConnectAsync(host, peer.Port, displayName))
+            if (await _client.ConnectAsync(host, peer.Port, _localName))
             {
                 ResetAttempts(peer.Id);
                 OnReconnectSuccess?.Invoke(peer.Id);

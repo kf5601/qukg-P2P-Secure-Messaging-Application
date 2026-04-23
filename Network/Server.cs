@@ -551,7 +551,7 @@ public class Server
         }
         byte[] frame = BuildFrame(message);
         Parallel.ForEach(snapshot, client =>
-            TrySendFrame(client, frame);
+            TrySendFrame(client, frame));
     }
 
 
