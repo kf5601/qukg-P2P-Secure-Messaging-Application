@@ -1,4 +1,4 @@
-// [Your Name Here]
+// Quang Huynh (qth938)
 // CSCI 251 - Secure Distributed Messenger
 //
 // SPRINT 3: P2P & Advanced Features
@@ -60,7 +60,30 @@ public class PeerDiscovery
     /// </summary>
     public void Start(int tcpPort)
     {
-        throw new NotImplementedException("Implement Start() - see TODO in comments above");
+        Stop();
+
+        TcpPort = tcpPort;
+        _cancellationTokenSource = new CancellationTokenSource();
+        _udpClient = new UdpClient(_broadcastPort)
+        {
+            EnableBroadcast = true
+        };
+        _udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+
+        _listenThread = new Thread(ListenLoop)
+        {
+            IsBackground = true,
+            Name = "PeerDiscoveryListen"
+        };
+        _broadcastThread = new Thread(BroadcastLoop)
+        {
+            IsBackground = true,
+            Name = "PeerDiscoveryBroadcast"
+        };
+
+        _listenThread.Start();
+        _broadcastThread.Start();
+        _ = Task.Run(TimeoutCheckLoop);
     }
 
     /// <summary>
@@ -77,7 +100,32 @@ public class PeerDiscovery
     /// </summary>
     private void BroadcastLoop()
     {
-        throw new NotImplementedException("Implement BroadcastLoop() - see TODO in comments above");
+        if (_udpClient == null || _cancellationTokenSource == null)
+            return;
+
+        var endpoint = new IPEndPoint(IPAddress.Broadcast, _broadcastPort);
+        var token = _cancellationTokenSource.Token;
+
+        while (!token.IsCancellationRequested)
+        {
+            try
+            {
+                string message = $"PEER:{LocalPeerId}:{TcpPort}";
+                byte[] data = Encoding.UTF8.GetBytes(message);
+                _udpClient.Send(data, data.Length, endpoint);
+            }
+            catch (SocketException)
+            {
+                // Broadcast may be blocked on some networks; keep discovery alive.
+            }
+            catch (ObjectDisposedException)
+            {
+                break;
+            }
+
+            if (token.WaitHandle.WaitOne(TimeSpan.FromSeconds(5)))
+                break;
+        }
     }
 
     /// <summary>
@@ -93,7 +141,33 @@ public class PeerDiscovery
     /// </summary>
     private void ListenLoop()
     {
-        throw new NotImplementedException("Implement ListenLoop() - see TODO in comments above");
+        if (_udpClient == null || _cancellationTokenSource == null)
+            return;
+
+        var token = _cancellationTokenSource.Token;
+        var receiveEndpoint = new IPEndPoint(IPAddress.Any, _broadcastPort);
+
+        while (!token.IsCancellationRequested)
+        {
+            try
+            {
+                byte[] data = _udpClient.Receive(ref receiveEndpoint);
+                string message = Encoding.UTF8.GetString(data);
+                if (message.StartsWith("PEER:", StringComparison.OrdinalIgnoreCase))
+                {
+                    ProcessDiscoveryMessage(message, receiveEndpoint.Address);
+                }
+            }
+            catch (SocketException)
+            {
+                if (token.IsCancellationRequested)
+                    break;
+            }
+            catch (ObjectDisposedException)
+            {
+                break;
+            }
+        }
     }
 
     /// <summary>
@@ -111,7 +185,45 @@ public class PeerDiscovery
     /// </summary>
     private void ProcessDiscoveryMessage(string message, IPAddress senderAddress)
     {
-        throw new NotImplementedException("Implement ProcessDiscoveryMessage() - see TODO in comments above");
+        string[] parts = message.Split(':', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length < 3)
+            return;
+
+        string peerId = parts[1];
+        if (!int.TryParse(parts[2], out int port))
+            return;
+
+        if (peerId.Equals(LocalPeerId, StringComparison.OrdinalIgnoreCase))
+            return;
+
+        bool isNew = false;
+        Peer peer = _knownPeers.AddOrUpdate(
+            peerId,
+            _ =>
+            {
+                isNew = true;
+                return new Peer
+                {
+                    Id = peerId,
+                    Name = peerId,
+                    Address = senderAddress,
+                    Port = port,
+                    LastSeen = DateTime.Now,
+                    IsConnected = false
+                };
+            },
+            (_, existing) =>
+            {
+                existing.Address = senderAddress;
+                existing.Port = port;
+                existing.LastSeen = DateTime.Now;
+                return existing;
+            });
+
+        if (isNew)
+        {
+            OnPeerDiscovered?.Invoke(peer);
+        }
     }
 
     /// <summary>
@@ -129,7 +241,33 @@ public class PeerDiscovery
     /// </summary>
     private async Task TimeoutCheckLoop()
     {
-        throw new NotImplementedException("Implement TimeoutCheckLoop() - see TODO in comments above");
+        if (_cancellationTokenSource == null)
+            return;
+
+        var token = _cancellationTokenSource.Token;
+        TimeSpan timeout = TimeSpan.FromSeconds(30);
+
+        while (!token.IsCancellationRequested)
+        {
+            DateTime now = DateTime.Now;
+            foreach (var entry in _knownPeers.ToArray())
+            {
+                if ((now - entry.Value.LastSeen) > timeout &&
+                    _knownPeers.TryRemove(entry.Key, out Peer? lostPeer))
+                {
+                    OnPeerLost?.Invoke(lostPeer);
+                }
+            }
+
+            try
+            {
+                await Task.Delay(TimeSpan.FromSeconds(5), token);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
+        }
     }
 
     /// <summary>
@@ -150,6 +288,35 @@ public class PeerDiscovery
     /// </summary>
     public void Stop()
     {
-        throw new NotImplementedException("Implement Stop() - see TODO in comments above");
+        try
+        {
+            _cancellationTokenSource?.Cancel();
+        }
+        catch
+        {
+        }
+
+        try
+        {
+            _udpClient?.Close();
+            _udpClient?.Dispose();
+        }
+        catch
+        {
+        }
+
+        try
+        {
+            _listenThread?.Join(1000);
+            _broadcastThread?.Join(1000);
+        }
+        catch
+        {
+        }
+
+        _udpClient = null;
+        _listenThread = null;
+        _broadcastThread = null;
+        _cancellationTokenSource = null;
     }
 }

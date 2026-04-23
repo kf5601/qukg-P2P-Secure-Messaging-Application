@@ -8,7 +8,7 @@
     "net9.0": []
   },
   "packageFolders": {
-    "C:\\Users\\CodexSandboxOffline\\.nuget\\packages\\": {},
+    "C:\\Users\\Quang\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
@@ -17,7 +17,7 @@
       "projectUniqueName": "C:\\Users\\Quang\\Desktop\\copads group\\SecureMessenger.csproj",
       "projectName": "SecureMessenger",
       "projectPath": "C:\\Users\\Quang\\Desktop\\copads group\\SecureMessenger.csproj",
-      "packagesPath": "C:\\Users\\CodexSandboxOffline\\.nuget\\packages\\",
+      "packagesPath": "C:\\Users\\Quang\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\Quang\\Desktop\\copads group\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
@@ -72,7 +72,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.312/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.313/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

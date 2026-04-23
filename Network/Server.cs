@@ -324,9 +324,22 @@ public class Server
                             if (message.TargetPeerId is not null)
                                 SendToClient(message, message.TargetPeerId);
                             break;
+                        case MessageType.Heartbeat:
+                            OnMessageReceived?.Invoke(message);
+                            break;
                         case MessageType.Text:
                         default:
                             OnMessageReceived?.Invoke(message);
+                            bool isControlMessage =
+                                message.Content.StartsWith("__CREATE_ROOM__", StringComparison.Ordinal) ||
+                                message.Content.StartsWith("__JOIN_ROOM__", StringComparison.Ordinal) ||
+                                message.Content.StartsWith("__LEAVE_ROOM__", StringComparison.Ordinal);
+
+                            if (isControlMessage || message.TargetPeerId is not null)
+                            {
+                                break;
+                            }
+
                             string? senderRoom = GetRoomForEndpoint(endpoint);
                             if (senderRoom is not null)
                                 BroadcastToRoom(message, senderRoom); // room-scoped only
@@ -432,10 +445,9 @@ public class Server
             clientsCopy = _clients.ToList();
         }
 
-
-        foreach (TcpClient client in clientsCopy)
+        Parallel.ForEach(clientsCopy, client =>
         {
-            if (client == sender) continue;
+            if (client == sender) return;
 
 
             try
@@ -481,7 +493,7 @@ public class Server
                 var badEndpoint = client.Client.RemoteEndPoint?.ToString() ?? "unknown";
                 DisconnectClient(client, badEndpoint);
             }
-        }
+        });
     }
 
 
@@ -496,11 +508,11 @@ public class Server
         }
 
 
-        foreach (var ep in members)
+        Parallel.ForEach(members, ep =>
         {
             TcpClient? client;
             lock (_clientsLock) { _endpointMap.TryGetValue(ep, out client); }
-            if (client is null) continue;
+            if (client is null) return;
 
             Message outbound = message;
 
@@ -522,7 +534,7 @@ public class Server
             }
 
             TrySendFrame(client, BuildFrame(outbound));
-        }
+        });
     }
 
 
@@ -538,7 +550,7 @@ public class Server
                 .ToList();
         }
         byte[] frame = BuildFrame(message);
-        foreach (var client in snapshot)
+        Parallel.ForEach(snapshot, client =>
             TrySendFrame(client, frame);
     }
 
