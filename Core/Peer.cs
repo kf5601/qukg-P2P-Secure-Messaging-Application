@@ -1,4 +1,4 @@
-// [Your Name Here]
+// Kai Fan kf5601
 // CSCI 251 - Secure Distributed Messenger
 //
 // SPRINT 3: P2P & Advanced Features
