@@ -163,5 +163,137 @@
     "EncryptedContent": "SAdRnnSKlbYYvIWJcwu1lgQGT4yM4cz9s8UR3Zml/GVc6/EDQIOS3F+zmiGyZoPd",
     "PublicKey": null,
     "TargetPeerId": null
+  },
+  {
+    "Id": "a8d28c0e-e893-418e-bd89-42d8315d93f2",
+    "Sender": "Uday",
+    "Content": "hey its Kai",
+    "Timestamp": "2026-04-24T17:49:31.7630807-04:00",
+    "Type": 0,
+    "Signature": "UyzMrYnVjU2NYd+RGXfJPSpYfxVOvE1cAPzM+O0iEU+AUwlGUogjAomBX49YgvRktGUvQzXUqa5YyEvu+N2VKgiEcSAZ37hPrBA8F0OOhtWaNQflWJxvBIvbn51NX5L1Y+34Vq1t8RDK5ArqNMOX3JVwl4ZlYQ0JpOar9DWzr3viQgAvRt+RxTINqwY90YzsS04vbv3rzyGRyd0YlYZHk5tuhNpmpQh9a+nqMdC0ffJ/xqCcd8BDYObtlL/65JLbzuepHA1L1wwXktbI52TZFvTOdS/3bj3MxaudbAldAsDacpI9f3QxNT9ythgQug0Sn53tsgdbXuLAVeGAWcmx8w==",
+    "EncryptedContent": null,
+    "PublicKey": null,
+    "TargetPeerId": "#demo"
+  },
+  {
+    "Id": "df1ca048-f34a-4d76-a85b-b7659e80ed09",
+    "Sender": "Uday",
+    "Content": "has joined the conversation",
+    "Timestamp": "2026-04-24T17:52:35.3712167-04:00",
+    "Type": 0,
+    "Signature": null,
+    "EncryptedContent": "QUiFFHeks1CLsaHYuCZoP1IdIWjquoj5qTSlg/BI9Nle2z4MsU7nqL4WfImlsKxU",
+    "PublicKey": null,
+    "TargetPeerId": null
+  },
+  {
+    "Id": "f28dec19-853f-4875-8758-03bc282372e7",
+    "Sender": "Uday",
+    "Content": "has joined the conversation",
+    "Timestamp": "2026-04-24T17:54:40.7845418-04:00",
+    "Type": 0,
+    "Signature": null,
+    "EncryptedContent": "jagsbrVWop5JUf5cfMDEwpnTOcIzKkAM+/oKlbw5ed8jjhEIxUFUAMsmi8Ceaa4G",
+    "PublicKey": null,
+    "TargetPeerId": null
+  },
+  {
+    "Id": "da53d2dc-cfd9-49da-918a-060d3a9958f4",
+    "Sender": "Grant",
+    "Content": "test",
+    "Timestamp": "2026-04-24T17:57:04.2012922-04:00",
+    "Type": 0,
+    "Signature": "Qw+vEnNNHwVDi/6QrrMki3XIxic5yXRJw6VTGHM3ITqQSOTPa7/W6m6XT2QFV76JxJ/WEjamF0LQKgmO1ZGyexGpONnyAgoVxsLnDPURm8yXUBcFVIrV6J+5os6iBtPOgOLuZ/FJYYOuKJMN/iBc+LecrdlglDS7pBAlUA3LcXEWrPnc0K0WnFqvHmRBOTs0O5aPA6SYzdPFIZv+ifVBS9nBJEM+BPQZPbGHLbk/xPRjCsi7vaegrvOilJaPsSFjRs8zQ3X5CtTHY0Hu1b6cPmLfQMqOplnGnL4Gn+VrRHwMKZa20uYmKNNah0VGjGdjX+YW4r4eAtYSk+rrr/ouNg==",
+    "EncryptedContent": null,
+    "PublicKey": null,
+    "TargetPeerId": "#test"
+  },
+  {
+    "Id": "c13ff1d7-eab4-463b-a16b-7436a5d93a58",
+    "Sender": "Grant",
+    "Content": "has joined the conversation",
+    "Timestamp": "2026-04-24T17:58:54.9872093-04:00",
+    "Type": 0,
+    "Signature": null,
+    "EncryptedContent": "SvMOQuWOFrJA+T99zyn7oJyvfiOgP8JMdgZ8AiFhFx5EV4d46T5AJ8Kc6IDfZcNq",
+    "PublicKey": null,
+    "TargetPeerId": null
+  },
+  {
+    "Id": "aa32ceed-1227-41ae-8f61-55eedfeeb7a8",
+    "Sender": "Kai",
+    "Content": "test",
+    "Timestamp": "2026-04-24T17:59:41.6137915-04:00",
+    "Type": 0,
+    "Signature": "TkzClc5aQt+H/Ju2zwwMs4PFqeat+WGqL1t8RixcGd4VUdaIE3iWcpbILQa3Ozo1DljM5UpdcNRvH3pQ4Rjx+3e6J8ekXB52VOaJV8cdIpAc2jqdjZF4OKZBt91H5/3lQU+32fsYh44RhsqchSx2SZYKRwXwNwRQmxWgybw84yYniV7QnSPo1Knss+uIrFS0h1u3laVCSNMg1eFtyueODrLyapSpd1Bd86+j03Om6qOMiFaueU+CerIFujo0H3ZR54WpdENqD5LwaietQT/DxRmixUHzsCQklXm+RMNpI0CXJO02kkNPuCruOUX6e7h7phMASA0MZtcbyfaOlO2XkA==",
+    "EncryptedContent": "7mfOpdZMIiQfbZK1HN1K6riqQ0L5tApq0Yb9k1Bc5QM=",
+    "PublicKey": null,
+    "TargetPeerId": "#test1"
+  },
+  {
+    "Id": "44880e1c-d603-430a-8dff-cb6c58749d0f",
+    "Sender": "Grant",
+    "Content": "has joined the conversation",
+    "Timestamp": "2026-04-24T18:03:45.4655506-04:00",
+    "Type": 0,
+    "Signature": null,
+    "EncryptedContent": "+YvGWmcaSCWgb6yYCk5PHbMvx26Ng8muC4TeIzBcBaZaom5U4AlXusL4WOaS282p",
+    "PublicKey": null,
+    "TargetPeerId": null
+  },
+  {
+    "Id": "f5596ef0-a6ef-45be-9566-f18aa4e667d3",
+    "Sender": "Kai",
+    "Content": "hey its Kai",
+    "Timestamp": "2026-04-24T18:04:41.6364231-04:00",
+    "Type": 0,
+    "Signature": "SuP/82ljcnc6Hg257nWTV29cptlUPdivdaqNX+TPgYcMUwlkwME9zCMs4nqBEpVDQWAr3W71Km8GX3XeLHpP1fGgPNTIGxe2oHEWH0tvNzQlQ1CktstHKD+OiPls1jMUMMnHmxciVbSokShgTCCLdrV8QpiCFlwziVuNEQWjWj9jw9FMiPb6uKs7WCihAJqDzVKhn678XJOY574y4toflu6Fu2FeXNlMo01CaVmP3SVSEqiM7a1XrKk07hEIlbU17j6CFTvDbkeNzF8pAk+WPP5DLMp93xKDjwtNIQPItE9rtnUonUdNr/eTxFMF8qKFk2ZIgt4dF6a2yciPbDMX2Q==",
+    "EncryptedContent": "a03ImCdj6K/juFkFUyYANmckiemeEqkSTMSWgh00T4Q=",
+    "PublicKey": null,
+    "TargetPeerId": "#demo"
+  },
+  {
+    "Id": "6b3763ff-781d-4632-b9d0-241d1006bdd9",
+    "Sender": "Uday",
+    "Content": "Uday here",
+    "Timestamp": "2026-04-24T18:04:51.2028964-04:00",
+    "Type": 0,
+    "Signature": "jG1B/bJsiNxFfH9fUY7vojlDgx7RVzslrXhF1N+p+Unb8ETDvPOcZVcK2PlG5cdKsX13Ny4py5LrUDg1VMobN18R/s54jhFWJB29ikLyqtQ9LhtQFkdgRozjLCYvu+6PopRbsMMUgVroY//4e8z5uIjtmrRGwPAmKig0LW4yrLcP0SoLZsmeCGs0cnIylyL/2X3TxYGxHaTD7fcVaBWsQrLoVHwa0W5p9f3NQYgLk/qXErxwIXeHrhuvLZb+PaWYHdFnMdY4s7r5AjeVTe/DjjFFr62W4CmoY/awrSpMfGbj6+nW5jW15WNPq3QK6tngrEh16ml2SkHWtjTK2FpxRw==",
+    "EncryptedContent": null,
+    "PublicKey": null,
+    "TargetPeerId": "#demo"
+  },
+  {
+    "Id": "6b3763ff-781d-4632-b9d0-241d1006bdd9",
+    "Sender": "Uday",
+    "Content": "Uday here",
+    "Timestamp": "2026-04-24T18:04:51.2028964-04:00",
+    "Type": 0,
+    "Signature": "jG1B/bJsiNxFfH9fUY7vojlDgx7RVzslrXhF1N+p+Unb8ETDvPOcZVcK2PlG5cdKsX13Ny4py5LrUDg1VMobN18R/s54jhFWJB29ikLyqtQ9LhtQFkdgRozjLCYvu+6PopRbsMMUgVroY//4e8z5uIjtmrRGwPAmKig0LW4yrLcP0SoLZsmeCGs0cnIylyL/2X3TxYGxHaTD7fcVaBWsQrLoVHwa0W5p9f3NQYgLk/qXErxwIXeHrhuvLZb+PaWYHdFnMdY4s7r5AjeVTe/DjjFFr62W4CmoY/awrSpMfGbj6+nW5jW15WNPq3QK6tngrEh16ml2SkHWtjTK2FpxRw==",
+    "EncryptedContent": "DevwAlO9wradkZGMV4mJ/IH1+1HqfpW4HPiNMVDMosE=",
+    "PublicKey": null,
+    "TargetPeerId": "#demo"
+  },
+  {
+    "Id": "564c099b-194e-42ec-851f-483001f2da9b",
+    "Sender": "Grant",
+    "Content": "Grant in the chat",
+    "Timestamp": "2026-04-24T18:05:04.8289403-04:00",
+    "Type": 0,
+    "Signature": "buRG66Ey0o6cuZPFnu4t8YZ4aF4cRJ14O4SE7k8lWPUSTheR0RsdN3S4y2hCTLg+GjnxheS5zSl74TZi3ZomyRqhCEi0SZWtpG7hbauGcjQbuv0edHINNDxyHnPiUYBzdWIEqyJd2SOLKHzmEcuHgGbCuHhQJvLfDEmdRJqs5JUxTbdlkZcelVfrvsIz7bsGpLh0kPYMEhLupXgSKm8APjr4YoRd3/nnco1Jy1HoU2kbgNyFlIipEkEobYx1hnabXth5LSMgBh0x5A0D+aTeQRgFQa27ENLL4qJ/oPTUx7YB0SlzY7ZANC5Rq7ogIuJMnfs1ysFvjZPo9ECDKBRUfQ==",
+    "EncryptedContent": "Ig8+E4/P0ayabEf+sBSJ5qwyeQlkIWpmZUlvd1aemdbP4klmCICaTn8FgvCQrJ7g",
+    "PublicKey": null,
+    "TargetPeerId": "#demo"
+  },
+  {
+    "Id": "c6a6dde4-828d-401b-adfc-b4a777e1056a",
+    "Sender": "Uday",
+    "Content": "hey just you",
+    "Timestamp": "2026-04-24T18:05:30.476825-04:00",
+    "Type": 0,
+    "Signature": "rH2jk8X+bR69nN2t8zE9UHsVvKPZRniiqeKMRczqS1bzPdEM4vaDCz9bqqvk4yc4x40V7oTSGnUFhTFf0D0mYAeA4Pop6Xzzho1O4BiV8G4Ibg+QpJXwrQgNWC5r8l7qhjDCAMCvigI3ZvkhMonmJpOux9AI1wCLhZsKe67UeCk/8dw6aYkq7Jnv+rnMlPZLkO+ptdeUBJKagcNzbRnBEt2sBpCQSghPrjQE+WUDlE0mwrnnMU+fm2lN3OkS1Cfnu5KmqiYBbFZ2Z0KGaWNdgWk+ZRxo2UGAZOPFM+/qvUBkE0XQNJpJVij2Z7YYqw5mWUSietzzrzM4XvKUskgxtA==",
+    "EncryptedContent": null,
+    "PublicKey": null,
+    "TargetPeerId": "@Kai"
   }
 ]
